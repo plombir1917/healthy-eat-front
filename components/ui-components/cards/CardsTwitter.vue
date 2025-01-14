@@ -2,7 +2,7 @@
 
 <template>
   <!-- ----------------------------------------------------------------------------- -->
-  <!-- Twiteter -->
+  <!-- Twitter -->
   <!-- ----------------------------------------------------------------------------- -->
   <v-card
     class="mx-auto"
@@ -18,7 +18,9 @@
     </template>
 
     <v-card-text class="text-h5 py-2">
-      "Turns out semicolon-less style is easier and safer in TS because most gotcha edge cases are type invalid as well."
+      "Оказывается, стиль без точки с запятой проще и безопаснее в TS, потому
+      что большинство крайних случаев ошибок также являются недопустимыми
+      типами."
     </v-card-text>
 
     <v-card-actions>
@@ -30,9 +32,9 @@
           ></v-avatar>
         </template>
 
-        <v-list-item-title>Evan You</v-list-item-title>
+        <v-list-item-title>Еван Ю</v-list-item-title>
 
-        <v-list-item-subtitle>Vue Creator</v-list-item-subtitle>
+        <v-list-item-subtitle>Создатель Vue</v-list-item-subtitle>
 
         <template v-slot:append>
           <div class="justify-self-end">

@@ -4,11 +4,11 @@
   <!-- ----------------------------------------------------------------------------- -->
   <!-- Props -->
   <!-- ----------------------------------------------------------------------------- -->
-  <v-card  elevation="0">
-    <template v-slot:title> This is a title </template>
+  <v-card elevation="0">
+    <template v-slot:title> Это заголовок </template>
 
-    <template v-slot:subtitle> This is a subtitle </template>
+    <template v-slot:subtitle> Это подзаголовок </template>
 
-    <template v-slot:text> This is content </template></v-card
-  >
+    <template v-slot:text> Это содержимое </template>
+  </v-card>
 </template>
