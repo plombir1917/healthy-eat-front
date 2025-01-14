@@ -2,22 +2,27 @@
   <v-card class="pa-3" elevation="10">
     <v-card-text>
       <div>
-        <h3 class="text-h5 title mb-1">Timeline Overview</h3>
-        <h5 class="text-subtitle-1">Activity around the globe</h5>
+        <h3 class="text-h5 title mb-1">Обзор временной шкалы</h3>
+        <h5 class="text-subtitle-1">Активность по всему миру</h5>
       </div>
       <div class="profiletimeline position-relative mt-7">
         <div class="sl-item mt-2 mb-3">
           <div class="sl-left float-left me-3">
-            <img src="/images/profile/1.jpg" width="40" alt="user" class="rounded-circle" />
+            <img
+              src="/images/profile/1.jpg"
+              width="40"
+              alt="user"
+              class="rounded-circle"
+            />
           </div>
           <div class="sl-right">
             <div>
               <div class="d-md-flex align-items-center">
-                <h3>John Doe</h3>
-                <small class="sl-date text-muted ms-1">5 minutes ago</small>
+                <h3>Джон Доу</h3>
+                <small class="sl-date text-muted ms-1">5 минут назад</small>
               </div>
 
-              <p>assign a new task Design weblayout</p>
+              <p>назначить новую задачу Дизайн веб-макета</p>
               <div class="v-row mt-3">
                 <div class="v-col-lg-3 v-col-md-6 mb-3">
                   <img src="/images/big/img1.jpg" width="100" alt="user" />
@@ -32,21 +37,30 @@
                   <img src="/images/big/img4.jpg" width="100" alt="user" />
                 </div>
               </div>
-              <a href="/" class="text-decoration-none mr-3 text-primary"><v-icon>mdi-message</v-icon> comments</a>
-              <a href="/" class="text-decoration-none text-red"><v-icon>mdi-heart</v-icon> 5 Likes</a>
+              <a href="/" class="text-decoration-none mr-3 text-primary"
+                ><v-icon>mdi-message</v-icon> комментарии</a
+              >
+              <a href="/" class="text-decoration-none text-red"
+                ><v-icon>mdi-heart</v-icon> 5 лайков</a
+              >
             </div>
           </div>
         </div>
         <v-divider></v-divider>
         <div class="sl-item my-4 border-top pt-4">
           <div class="sl-left float-left me-3">
-            <img src="/images/profile/2.jpg" width="40" alt="user" class="rounded-circle" />
+            <img
+              src="/images/profile/2.jpg"
+              width="40"
+              alt="user"
+              class="rounded-circle"
+            />
           </div>
           <div class="sl-right">
             <div>
               <div class="d-md-flex align-items-center">
-                <h3 class="">James Smith</h3>
-                <small class="sl-date text-muted ms-1">5 minutes ago</small>
+                <h3 class="">Джеймс Смит</h3>
+                <small class="sl-date text-muted ms-1">5 минут назад</small>
               </div>
               <div class="mt-3 v-row">
                 <div class="v-col-md-3">
@@ -59,12 +73,17 @@
                     diam.
                   </p>
                   <v-btn color="primary" variant="tonal" flat class="mt-3">
-                    Design weblayout</v-btn>
+                    Дизайн веб-макета</v-btn
+                  >
                 </div>
               </div>
               <div class="text-nowrap mt-3">
-                <a href="/" class="text-decoration-none mr-3 text-primary"><v-icon>mdi-message</v-icon> comments</a>
-                <a href="/" class="text-decoration-none text-red"><v-icon>mdi-heart</v-icon> 5 Likes</a>
+                <a href="/" class="text-decoration-none mr-3 text-primary"
+                  ><v-icon>mdi-message</v-icon> комментарии</a
+                >
+                <a href="/" class="text-decoration-none text-red"
+                  ><v-icon>mdi-heart</v-icon> 5 лайков</a
+                >
               </div>
             </div>
           </div>
@@ -72,13 +91,18 @@
         <v-divider></v-divider>
         <div class="sl-item my-4 border-top pt-4">
           <div class="sl-left float-left me-3">
-            <img src="/images/profile/3.jpg" width="40" alt="user" class="rounded-circle" />
+            <img
+              src="/images/profile/3.jpg"
+              width="40"
+              alt="user"
+              class="rounded-circle"
+            />
           </div>
           <div class="sl-right">
             <div>
               <div class="d-md-flex align-items-center">
-                <h3 class="">Maria Smith</h3>
-                <small class="sl-date text-muted ms-1">5 minutes ago</small>
+                <h3 class="">Мария Смит</h3>
+                <small class="sl-date text-muted ms-1">5 минут назад</small>
               </div>
               <p class="my-4 fs-3">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
@@ -88,21 +112,30 @@
               </p>
             </div>
             <div class="text-nowrap mt-3">
-              <a href="/" class="text-decoration-none mr-3 text-primary"><v-icon>mdi-message</v-icon> comments</a>
-              <a href="/" class="text-decoration-none text-red"><v-icon>mdi-heart</v-icon> 5 Likes</a>
+              <a href="/" class="text-decoration-none mr-3 text-primary"
+                ><v-icon>mdi-message</v-icon> комментарии</a
+              >
+              <a href="/" class="text-decoration-none text-red"
+                ><v-icon>mdi-heart</v-icon> 5 лайков</a
+              >
             </div>
           </div>
         </div>
         <v-divider></v-divider>
         <div class="sl-item my-4 border-top pt-4">
           <div class="sl-left float-left me-3">
-            <img src="/images/profile/4.jpg" width="40" alt="user" class="rounded-circle" />
+            <img
+              src="/images/profile/4.jpg"
+              width="40"
+              alt="user"
+              class="rounded-circle"
+            />
           </div>
           <div class="sl-right">
             <div>
               <div class="d-md-flex">
-                <h3 class="">john Smith</h3>
-                <small class="sl-date text-muted ms-1">5 minutes ago</small>
+                <h3 class="">Джон Смит</h3>
+                <small class="sl-date text-muted ms-1">5 минут назад</small>
               </div>
               <v-alert class="mt-4 fs-3" color="primary" variant="tonal">
                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
@@ -114,13 +147,18 @@
         <v-divider></v-divider>
         <div class="sl-item my-4 border-top pt-4">
           <div class="sl-left float-left me-3">
-            <img src="/images/profile/1.jpg" width="40" alt="user" class="rounded-circle" />
+            <img
+              src="/images/profile/1.jpg"
+              width="40"
+              alt="user"
+              class="rounded-circle"
+            />
           </div>
           <div class="sl-right">
             <div>
               <div class="d-md-flex">
-                <h3 class="">john Smith</h3>
-                <small class="sl-date text-muted ms-1">5 minutes ago</small>
+                <h3 class="">Джон Смит</h3>
+                <small class="sl-date text-muted ms-1">5 минут назад</small>
               </div>
               <v-alert class="mt-4 fs-3" color="secondary" variant="tonal">
                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
