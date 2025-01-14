@@ -4,11 +4,10 @@ import {
   CircleDotIcon,
   BoxMultiple1Icon,
   AdjustmentsHorizontalIcon,
-  LayoutDashboardIcon
-
+  LayoutDashboardIcon,
 } from 'vue-tabler-icons';
 
-export interface menu {
+export interface Menu {
   header?: string;
   title?: string;
   icon?: any;
@@ -18,48 +17,45 @@ export interface menu {
   chipColor?: string;
   chipVariant?: string;
   chipIcon?: string;
-  children?: menu[];
+  children?: Menu[];
   disabled?: boolean;
   type?: string;
   subCaption?: string;
 }
 
-const sidebarItem: menu[] = [
-  { header: 'Home' },
+const sidebarItem: Menu[] = [
+  { header: 'Главная' },
   {
-    title: "Dashboard",
+    title: 'Панель управления',
     icon: LayoutDashboardIcon,
-    to: "/",
+    to: '/',
   },
-  { header: 'Utilities' },
+  { header: 'Утилиты' },
   {
-    title: "Alert",
+    title: 'Уведомления',
     icon: AlertCircleIcon,
-    to: "/ui-components/alerts",
+    to: '/ui-components/alerts',
   },
   {
-    title: "Button",
+    title: 'Кнопки',
     icon: CircleDotIcon,
-    to: "/ui-components/buttons",
+    to: '/ui-components/buttons',
   },
   {
-    title: "Cards",
+    title: 'Карточки',
     icon: BoxMultiple1Icon,
-    to: "/ui-components/cards",
+    to: '/ui-components/cards',
   },
   {
-    title: "Curousel",
+    title: 'Карусель',
     icon: AdjustmentsHorizontalIcon,
-    to: "/ui-components/curousel",
+    to: '/ui-components/curousel',
   },
   {
-    title: "Tables",
+    title: 'Таблицы',
     icon: BorderAllIcon,
-    to: "/ui-components/tabels",
+    to: '/ui-components/tabels',
   },
-
- 
-
 ];
 
 export default sidebarItem;
