@@ -1,8 +1,14 @@
 <template>
-    <div>
-        <v-alert class="mb-3" type="error">This is an error alert — check it out!</v-alert>
-        <v-alert class="mb-3" type="warning">This is a warning alert — check it out!</v-alert>
-        <v-alert class="mb-3" type="info">This is an info alert — check it out!</v-alert>
-        <v-alert type="success">This is a success alert — check it out!</v-alert>
-    </div>
+  <div>
+    <v-alert class="mb-3" type="error"
+      >Это сообщение об ошибке — проверьте его!</v-alert
+    >
+    <v-alert class="mb-3" type="warning"
+      >Это предупреждающее сообщение — проверьте его!</v-alert
+    >
+    <v-alert class="mb-3" type="info"
+      >Это информационное сообщение — проверьте его!</v-alert
+    >
+    <v-alert type="success">Это сообщение об успехе — проверьте его!</v-alert>
+  </div>
 </template>
