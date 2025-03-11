@@ -1,6 +1,9 @@
 <template>
   <div
-    class="min-h-screen bg-background dark:bg-gray-900 flex items-center justify-center"
+    class="min-h-screen bg-background dark:bg-gray-900 flex items-center justify-center bg-no-repeat bg-center bg-cover"
+    :style="{
+      backgroundImage: 'url(/back.jpg)',
+    }"
   >
     <div
       class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md"
