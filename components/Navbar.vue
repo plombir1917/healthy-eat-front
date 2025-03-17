@@ -4,7 +4,6 @@
       <div class="flex items-center justify-between">
         <!-- Логотип с дополнительным отступом слева -->
         <div class="flex items-center space-x-2">
-          <!-- Добавлен pl-6 для отступа слева -->
           <router-link
             to="/"
             class="flex items-center space-x-2 hover:text-primary dark:hover:text-white"
@@ -20,14 +19,30 @@
           </router-link>
         </div>
 
-        <!-- Кнопки и переключатель темы -->
+        <!-- Уведомления, смена темы и кнопка выхода -->
         <div class="flex items-center space-x-4">
-          <ThemeToggle />
           <button
-            class="text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-white"
+            @click="showNotifications"
+            class="relative text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-white"
           >
-            Профиль
+            <BellIcon class="w-6 h-6" />
+            <span
+              v-if="unreadNotifications > 0"
+              class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5"
+            >
+              {{ unreadNotifications }}
+            </span>
           </button>
+
+          <ThemeToggle />
+
+          <NuxtLink to="/profile">
+            <button
+              class="text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-white"
+            >
+              Профиль
+            </button></NuxtLink
+          >
           <NuxtLink to="/login"
             ><button
               class="text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-white"
@@ -42,7 +57,16 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+import { BellIcon } from 'lucide-vue-next';
 import ThemeToggle from '~/components/ThemeToggle.vue';
+
+const unreadNotifications = ref(3);
+
+const showNotifications = () => {
+  alert('У вас 3 новых уведомления!');
+  unreadNotifications.value = 0;
+};
 </script>
 
 <style scoped>
