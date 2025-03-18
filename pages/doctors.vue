@@ -1,13 +1,39 @@
 <template>
   <div class="bg-gray-100 dark:bg-gray-900 min-h-screen py-10">
+    <!-- Фильтрация врачей -->
+    <div
+      class="max-w-7xl mx-auto px-4 mb-6 flex justify-between items-center gap-4"
+    >
+      <input
+        v-model="search"
+        type="text"
+        placeholder="🔍 Поиск по имени или специальности"
+        class="w-full p-2 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white"
+      />
+      <select
+        v-model="selectedSpecialty"
+        class="p-2 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white"
+      >
+        <option value="">Все специальности</option>
+        <option
+          v-for="specialty in specialties"
+          :key="specialty"
+          :value="specialty"
+        >
+          {{ specialty }}
+        </option>
+      </select>
+    </div>
+
     <!-- Список карточек врачей -->
     <div
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4"
     >
       <div
-        v-for="(doctor, index) in doctors"
+        v-for="(doctor, index) in filteredDoctors"
         :key="index"
-        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-transform hover:scale-105"
+        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-transform hover:scale-105 cursor-pointer"
+        @click="openModal(doctor)"
       >
         <!-- Аватар -->
         <img
@@ -20,23 +46,11 @@
           <h2 class="text-xl font-semibold text-primary dark:text-white mb-2">
             {{ doctor.name }}
           </h2>
-          <p class="text-secondary dark:text-gray-300 mb-4">
+          <p class="text-secondary dark:text-gray-300 mb-2">
             {{ doctor.specialty }}
           </p>
-          <!-- Кнопки -->
-          <div class="flex justify-between space-x-2">
-            <button
-              class="bg-primary hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition w-full"
-              @click="openModal(doctor)"
-            >
-              Подробнее
-            </button>
-            <button
-              class="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition w-full"
-            >
-              Отправить заявку
-            </button>
-          </div>
+          <!-- Рейтинг врача -->
+          <p class="text-yellow-500 mb-4">⭐ {{ doctor.rating }}/5</p>
         </div>
       </div>
     </div>
@@ -57,23 +71,32 @@
           &times;
         </button>
         <!-- Информация о враче -->
-        <h2 class="text-2xl font-bold text-primary dark:text-white mb-4">
-          {{ selectedDoctor.name }}
-        </h2>
-        <p class="text-secondary dark:text-gray-300 mb-2">
-          <strong>Специальность:</strong> {{ selectedDoctor.specialty }}
-        </p>
-        <p class="text-secondary dark:text-gray-300 mb-2">
-          <strong>Опыт работы:</strong> {{ selectedDoctor.experience }} лет
-        </p>
-        <p class="text-secondary dark:text-gray-300 mb-2">
-          <strong>Образование:</strong> {{ selectedDoctor.education }}
-        </p>
-        <p class="text-secondary dark:text-gray-300 mb-4">
-          <strong>Описание:</strong> {{ selectedDoctor.description }}
-        </p>
+        <div class="flex gap-6">
+          <img
+            :src="selectedDoctor.avatar"
+            alt="Фото врача"
+            class="h-48 w-48 rounded-lg object-cover"
+          />
+          <div>
+            <h2 class="text-2xl font-bold text-primary dark:text-white mb-4">
+              {{ selectedDoctor.name }}
+            </h2>
+            <p class="text-secondary dark:text-gray-300 mb-2">
+              <strong>Специальность:</strong> {{ selectedDoctor.specialty }}
+            </p>
+            <p class="text-secondary dark:text-gray-300 mb-2">
+              <strong>Опыт работы:</strong> {{ selectedDoctor.experience }} лет
+            </p>
+            <p class="text-secondary dark:text-gray-300 mb-2">
+              <strong>Образование:</strong> {{ selectedDoctor.education }}
+            </p>
+            <p class="text-secondary dark:text-gray-300 mb-4">
+              <strong>Описание:</strong> {{ selectedDoctor.description }}
+            </p>
+          </div>
+        </div>
         <button
-          class="bg-primary hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition w-full"
+          class="bg-primary hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition w-full mt-4"
           @click="closeModal"
         >
           Закрыть
@@ -84,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 // Моковые данные врачей
 const doctors = ref([
@@ -92,86 +115,103 @@ const doctors = ref([
     name: 'Анна Петрова',
     specialty: 'Терапевт',
     experience: 10,
-    education: 'МГУ им. Ломоносова',
-    description:
-      'Опытный терапевт с многолетним стажем работы. Специализируется на лечении хронических заболеваний.',
-    avatar:
-      'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+    education: 'МГУ',
+    description: 'Опытный терапевт.',
+    avatar: 'https://via.placeholder.com/150',
+    rating: 4.8,
   },
   {
     name: 'Иван Сидоров',
     specialty: 'Хирург',
     experience: 15,
-    education: 'РНИМУ им. Пирогова',
-    description:
-      'Высококвалифицированный хирург. Проводит сложные операции и консультирует пациентов.',
-    avatar:
-      'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+    education: 'РНИМУ',
+    description: 'Высококвалифицированный хирург.',
+    avatar: 'https://via.placeholder.com/150',
+    rating: 4.7,
   },
   {
     name: 'Мария Кузнецова',
     specialty: 'Педиатр',
     experience: 8,
     education: 'СПбГУ',
-    description:
-      'Любящий дети педиатр. Помогает родителям в уходе за детьми и лечении детских заболеваний.',
-    avatar:
-      'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+    description: 'Любящий детей педиатр.',
+    avatar: 'https://via.placeholder.com/150',
+    rating: 4.9,
   },
   {
     name: 'Александр Иванов',
     specialty: 'Кардиолог',
     experience: 12,
     education: 'МАМИ',
-    description:
-      'Эксперт в диагностике и лечении сердечно-сосудистых заболеваний.',
-    avatar:
-      'https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+    description: 'Эксперт по сердечно-сосудистым заболеваниям.',
+    avatar: 'https://via.placeholder.com/150',
+    rating: 4.6,
   },
   {
     name: 'Екатерина Смирнова',
     specialty: 'Невролог',
     experience: 9,
-    education: 'Российский университет дружбы народов',
-    description:
-      'Специализируется на лечении головных болей, мигреней и нервных расстройств.',
-    avatar:
-      'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+    education: 'РУДН',
+    description: 'Специалист по нервным расстройствам.',
+    avatar: 'https://via.placeholder.com/150',
+    rating: 4.7,
   },
   {
     name: 'Дмитрий Козлов',
     specialty: 'Стоматолог',
     experience: 7,
     education: 'МГМСУ',
-    description:
-      'Профессионал в области эстетической стоматологии и имплантологии.',
-    avatar:
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
+    description: 'Профессионал в эстетической стоматологии.',
+    avatar: 'https://via.placeholder.com/150',
+    rating: 4.9,
+  },
+  {
+    name: 'Василиса Тихонова',
+    specialty: 'Дерматолог',
+    experience: 11,
+    education: 'Сеченовский университет',
+    description: 'Эксперт по кожным заболеваниям.',
+    avatar: 'https://via.placeholder.com/150',
+    rating: 4.8,
+  },
+  {
+    name: 'Сергей Морозов',
+    specialty: 'Офтальмолог',
+    experience: 13,
+    education: 'РНИМУ',
+    description: 'Диагностика и лечение глазных болезней.',
+    avatar: 'https://via.placeholder.com/150',
+    rating: 4.9,
+  },
+  {
+    name: 'Ольга Беляева',
+    specialty: 'Эндокринолог',
+    experience: 14,
+    education: 'ММА',
+    description: 'Специалист по лечению эндокринных заболеваний.',
+    avatar: 'https://via.placeholder.com/150',
+    rating: 4.8,
   },
 ]);
 
-// Управление модальным окном
+const search = ref('');
+const selectedSpecialty = ref('');
+
+const specialties = computed(() => [
+  ...new Set(doctors.value.map((d) => d.specialty)),
+]);
+
+const filteredDoctors = computed(() => {
+  return doctors.value.filter(
+    (d) =>
+      (d.name.toLowerCase().includes(search.value.toLowerCase()) ||
+        d.specialty.toLowerCase().includes(search.value.toLowerCase())) &&
+      (selectedSpecialty.value === '' ||
+        d.specialty === selectedSpecialty.value)
+  );
+});
+
 const selectedDoctor = ref(null);
-
-const openModal = (doctor) => {
-  selectedDoctor.value = doctor;
-};
-
-const closeModal = () => {
-  selectedDoctor.value = null;
-};
+const openModal = (doctor) => (selectedDoctor.value = doctor);
+const closeModal = () => (selectedDoctor.value = null);
 </script>
-
-<style scoped>
-.text-primary {
-  color: #3b82f6;
-}
-
-.text-secondary {
-  color: #6b7280;
-}
-
-.bg-primary {
-  background-color: #3b82f6;
-}
-</style>
