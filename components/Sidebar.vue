@@ -4,7 +4,7 @@
       <ul class="space-y-2">
         <li>
           <NuxtLink
-            to="/dashboard"
+            to="/"
             active-class="bg-primary text-white dark:bg-gray-700 dark:text-white"
             class="flex items-center p-2 text-secondary hover:bg-primary hover:text-white dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-white rounded-lg transition-colors"
           >
