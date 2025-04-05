@@ -40,14 +40,12 @@
             required
           />
         </div>
-        <nuxt-link to="/"
-          ><button
-            type="submit"
-            class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            Войти
-          </button></nuxt-link
+        <button
+          type="submit"
+          class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-colors"
         >
+          Войти
+        </button>
       </form>
       <p class="mt-4 text-center text-secondary dark:text-gray-300">
         Нет аккаунта?
@@ -55,13 +53,46 @@
           >Зарегистрируйтесь</NuxtLink
         >
       </p>
+      <div class="mt-6 text-center">
+        <NuxtLink
+          to="/"
+          class="text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-white transition-colors flex items-center justify-center gap-2"
+        >
+          <ArrowLeftIcon class="w-4 h-4" />
+          На главную
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
+import { useAuth } from '../composables/useAuth';
+import { ArrowLeftIcon } from 'lucide-vue-next';
+import { useHead } from 'unhead';
+
 definePageMeta({
-  layout: 'empty', // Используем пустой макет
+  layout: 'empty',
+});
+
+useHead({
+  title: 'Zдоровье - Вход',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Войдите в свой аккаунт Zдоровье для доступа к персональным рекомендациям по питанию.',
+    },
+    { property: 'og:title', content: 'Zдоровье - Вход' },
+    {
+      property: 'og:description',
+      content:
+        'Войдите в свой аккаунт Zдоровье для доступа к персональным рекомендациям по питанию.',
+    },
+    { property: 'og:type', content: 'website' },
+  ],
 });
 
 const form = ref({
@@ -69,8 +100,38 @@ const form = ref({
   password: '',
 });
 
-const handleLogin = () => {
-  console.log('Вход:', form.value);
-  alert('Вход выполнен успешно!');
+const router = useRouter();
+const toast = useToast();
+const { setToken } = useAuth();
+
+const handleLogin = async () => {
+  try {
+    const response = await fetch('http://localhost:5000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(form.value),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Ошибка при входе');
+    }
+
+    if (data.token) {
+      setToken(data.token);
+      toast.success('Вход выполнен успешно!');
+      router.push('/admin/dashboard');
+    } else {
+      throw new Error('Токен не получен');
+    }
+  } catch (error) {
+    console.error('Ошибка входа:', error);
+    toast.error(
+      error.message || 'Произошла ошибка при входе. Попробуйте позже.'
+    );
+  }
 };
 </script>

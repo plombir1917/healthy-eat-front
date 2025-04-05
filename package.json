@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "healthy-eat-front",
   "private": true,
   "type": "module",
   "scripts": {
@@ -7,16 +7,21 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "generate-icons": "node scripts/generate-icons.js"
+  },
+  "devDependencies": {
+    "@nuxtjs/color-mode": "^3.3.2",
+    "@nuxtjs/tailwindcss": "^6.11.4",
+    "nuxt": "^3.10.3",
+    "sharp": "^0.33.2"
   },
   "dependencies": {
     "@nuxt/ui": "^2.21.0",
-    "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/google-fonts": "^3.2.0",
-    "@nuxtjs/tailwindcss": "^6.13.1",
-    "lucide-vue-next": "^0.482.0",
-    "nuxt": "^3.15.3",
+    "lucide-vue-next": "^0.344.0",
     "vue": "latest",
-    "vue-router": "latest"
+    "vue-router": "latest",
+    "vue-toastification": "^2.0.0-rc.5"
   }
 }

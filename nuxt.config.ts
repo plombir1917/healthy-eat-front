@@ -1,13 +1,21 @@
 export default defineNuxtConfig({
-  modules: ['@nuxtjs/color-mode', '@nuxtjs/tailwindcss'],
-
-  colorMode: {
-    preference: 'system', // По умолчанию использует системную тему
-    fallback: 'light', // Если системная тема не определена, использует светлую
-    classSuffix: '', // Добавляет суффикс к классам темы (например, `dark:bg-gray-900`)
-    storageKey: 'nuxt-color-mode', // Ключ для хранения темы в localStorage
+  app: {
+    head: {
+      htmlAttrs: {
+        lang: 'ru',
+      },
+      meta: [
+        { name: 'robots', content: 'index, follow' },
+        { name: 'googlebot', content: 'index, follow' },
+      ],
+    },
   },
-
+  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/color-mode'],
+  colorMode: {
+    classSuffix: '',
+    preference: 'system',
+    fallback: 'light',
+  },
   tailwindcss: {
     config: {
       darkMode: 'class', // Включаем поддержку тёмной темы через классы
@@ -29,6 +37,5 @@ export default defineNuxtConfig({
       },
     },
   },
-
   compatibilityDate: '2025-01-28',
 });

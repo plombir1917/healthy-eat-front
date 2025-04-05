@@ -28,12 +28,12 @@
           <label
             for="email"
             class="block text-secondary dark:text-gray-300 mb-2"
-            >Email</label
+            >Логин</label
           >
           <input
             type="email"
             id="email"
-            v-model="form.email"
+            v-model="form.login"
             class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
             required
           />
@@ -52,6 +52,20 @@
             required
           />
         </div>
+        <div class="mb-4">
+          <label
+            for="confirmPassword"
+            class="block text-secondary dark:text-gray-300 mb-2"
+            >Подтвердите пароль</label
+          >
+          <input
+            type="password"
+            id="confirmPassword"
+            v-model="form.confirmPassword"
+            class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            required
+          />
+        </div>
         <button
           type="submit"
           class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-colors"
@@ -65,23 +79,85 @@
           >Войдите</NuxtLink
         >
       </p>
+      <div class="mt-6 text-center">
+        <NuxtLink
+          to="/"
+          class="text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-white transition-colors flex items-center justify-center gap-2"
+        >
+          <ArrowLeftIcon class="w-4 h-4" />
+          На главную
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
+import { ArrowLeftIcon } from 'lucide-vue-next';
+
 definePageMeta({
-  layout: 'empty', // Используем пустой макет
+  layout: 'empty',
+});
+
+useHead({
+  title: 'Zдоровье - Регистрация',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Зарегистрируйтесь в Zдоровье и получите доступ к персональным рекомендациям по питанию от квалифицированных врачей.',
+    },
+    { property: 'og:title', content: 'Zдоровье - Регистрация' },
+    {
+      property: 'og:description',
+      content:
+        'Зарегистрируйтесь в Zдоровье и получите доступ к персональным рекомендациям по питанию от квалифицированных врачей.',
+    },
+    { property: 'og:type', content: 'website' },
+  ],
 });
 
 const form = ref({
   name: '',
-  email: '',
+  login: '',
   password: '',
+  confirmPassword: '',
 });
 
-const handleRegister = () => {
-  console.log('Регистрация:', form.value);
-  alert('Регистрация прошла успешно!');
+const router = useRouter();
+const toast = useToast();
+
+const handleRegister = async () => {
+  if (form.value.password !== form.value.confirmPassword) {
+    toast.error('Пароли не совпадают');
+    return;
+  }
+
+  try {
+    const { confirmPassword, ...registerData } = form.value;
+    const response = await fetch('http://localhost:5000/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(registerData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Ошибка при регистрации');
+    }
+
+    toast.success('Регистрация прошла успешно!');
+    router.push('/login');
+  } catch (error) {
+    console.error('Ошибка регистрации:', error);
+    toast.error(
+      error.message || 'Произошла ошибка при регистрации. Попробуйте позже.'
+    );
+  }
 };
 </script>
