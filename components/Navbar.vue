@@ -100,12 +100,11 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { BellIcon, ChevronDownIcon } from 'lucide-vue-next';
 import ThemeToggle from '~/components/ThemeToggle.vue';
-import { useAuth } from '~/composables/useAuth';
+import { useAuth } from '../composables/useAuth';
 import { useRouter } from 'vue-router';
-import { useToast } from 'vue-toastification';
+import { toast } from 'vue3-toastify';
 
 const router = useRouter();
-const toast = useToast();
 const { removeToken, isAuthenticated } = useAuth();
 
 const unreadNotifications = ref(3);

@@ -11,7 +11,7 @@
             <input
               type="file"
               class="hidden"
-              @change="uploadAvatar"
+              @change="handleAvatarUpdate"
               accept="image/*"
             />
             <div class="relative">
@@ -143,7 +143,7 @@
               Отмена
             </button>
             <button
-              @click="saveProfile"
+              @click="handleProfileUpdate"
               class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
             >
               Сохранить
@@ -355,12 +355,11 @@ import {
   CheckCircleIcon,
 } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
-import { useToast } from 'vue-toastification';
-import { useAuth } from '~/composables/useAuth';
+import { useAuth } from '../../composables/useAuth';
+import { toast } from 'vue3-toastify';
 
 const router = useRouter();
-const toast = useToast();
-const { removeToken, isAuthenticated } = useAuth();
+const { removeToken, isAuthenticated, setToken } = useAuth();
 
 // Состояние редактирования
 const isEditing = ref(false);
@@ -453,19 +452,19 @@ const bmiCategory = computed(() => {
 });
 
 // Методы
-const uploadAvatar = (e) => {
-  const file = e.target.files[0];
+const handleAvatarUpdate = async (event) => {
+  const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       avatarUrl.value = e.target.result;
-      toast.success('Аватар успешно обновлен');
+      await handleProfileUpdate();
     };
     reader.readAsDataURL(file);
   }
 };
 
-const saveProfile = () => {
+const handleProfileUpdate = async () => {
   // В реальном приложении здесь будет запрос к API
   user.value = {
     ...user.value,
