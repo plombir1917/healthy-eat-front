@@ -1,5 +1,5 @@
 import { defineNuxtPlugin } from '#app';
-import Toast from 'vue-toastification';
+import pkg from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -19,5 +19,5 @@ export default defineNuxtPlugin((nuxtApp) => {
     transition: 'Vue-Toastification__fade',
   };
 
-  nuxtApp.vueApp.use(Toast, options);
+  nuxtApp.vueApp.use(pkg, options);
 });
