@@ -1,62 +1,68 @@
 <template>
   <div
-    class="min-h-screen bg-background dark:bg-gray-900 flex items-center justify-center bg-no-repeat bg-center bg-cover"
+    class="min-h-screen bg-background dark:bg-gray-900 flex items-center justify-center bg-no-repeat bg-center bg-cover animate-fade-in"
     :style="{
       backgroundImage: 'url(/back.jpg)',
     }"
   >
     <div
-      class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md"
+      class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md animate-scale-in"
     >
-      <h2 class="text-2xl font-semibold text-primary dark:text-white mb-6">
+      <h2
+        class="text-2xl font-semibold text-primary dark:text-white mb-6 animate-slide-in"
+      >
         Вход
       </h2>
-      <form @submit.prevent="handleLogin">
-        <div class="mb-4">
-          <label
-            for="email"
-            class="block text-secondary dark:text-gray-300 mb-2"
-            >Email</label
-          >
-          <input
-            type="email"
-            id="email"
-            v-model="form.email"
-            class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
-        <div class="mb-4">
-          <label
-            for="password"
-            class="block text-secondary dark:text-gray-300 mb-2"
-            >Пароль</label
-          >
-          <input
-            type="password"
-            id="password"
-            v-model="form.password"
-            class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
-        <button
+      <form @submit.prevent="handleLogin" class="space-y-4">
+        <AnimatedInput
+          v-model="form.email"
+          label="Email"
+          type="email"
+          id="email"
+          required
+          :error="errors.email"
+          class="animate-slide-in"
+          style="animation-delay: 0.1s"
+        />
+        <AnimatedInput
+          v-model="form.password"
+          label="Пароль"
+          type="password"
+          id="password"
+          required
+          :error="errors.password"
+          class="animate-slide-in"
+          style="animation-delay: 0.2s"
+        />
+        <AnimatedButton
           type="submit"
-          class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition-colors"
+          variant="primary"
+          class="w-full animate-slide-in"
+          style="animation-delay: 0.3s"
+          :is-loading="isLoading"
+          @click="handleLogin"
         >
           Войти
-        </button>
+        </AnimatedButton>
       </form>
-      <p class="mt-4 text-center text-secondary dark:text-gray-300">
+      <p
+        class="mt-4 text-center text-secondary dark:text-gray-300 animate-fade-in"
+        style="animation-delay: 0.4s"
+      >
         Нет аккаунта?
-        <NuxtLink to="/register" class="text-primary hover:text-primary/80"
+        <NuxtLink
+          to="/register"
+          class="text-primary hover:text-primary/80 transition-colors"
           >Зарегистрируйтесь</NuxtLink
         >
       </p>
-      <div class="mt-6 text-center">
+      <div
+        class="mt-6 text-center animate-fade-in"
+        style="animation-delay: 0.5s"
+      >
         <NuxtLink
           to="/"
-          class="text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-white transition-colors flex items-center justify-center gap-2"
+          class="text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-white transition-colors flex items-center justify-center gap-2 btn-hover"
         >
           <ArrowLeftIcon class="w-4 h-4" />
           На главную
@@ -72,6 +78,7 @@ import { useToast } from 'vue-toastification';
 import { useAuth } from '../composables/useAuth';
 import { ArrowLeftIcon } from 'lucide-vue-next';
 import { useHead } from 'unhead';
+import { ref } from 'vue';
 
 definePageMeta({
   layout: 'empty',
@@ -100,11 +107,45 @@ const form = ref({
   password: '',
 });
 
+const errors = ref({
+  email: '',
+  password: '',
+});
+
 const router = useRouter();
 const toast = useToast();
 const { setToken } = useAuth();
+const isLoading = ref(false);
+
+const validateForm = () => {
+  let isValid = true;
+  errors.value = {
+    email: '',
+    password: '',
+  };
+
+  if (!form.value.email) {
+    errors.value.email = 'Email обязателен';
+    isValid = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.value.email = 'Введите корректный email';
+    isValid = false;
+  }
+
+  if (!form.value.password) {
+    errors.value.password = 'Пароль обязателен';
+    isValid = false;
+  }
+
+  return isValid;
+};
 
 const handleLogin = async () => {
+  if (!validateForm()) {
+    return;
+  }
+
+  isLoading.value = true;
   try {
     const response = await fetch('http://localhost:5000/login', {
       method: 'POST',
@@ -132,6 +173,8 @@ const handleLogin = async () => {
     toast.error(
       error.message || 'Произошла ошибка при входе. Попробуйте позже.'
     );
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>
