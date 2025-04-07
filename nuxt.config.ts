@@ -19,6 +19,7 @@ export default defineNuxtConfig({
     },
   },
   modules: ['@nuxtjs/tailwindcss', '@nuxtjs/color-mode'],
+  plugins: ['~/plugins/toast.ts', '~/plugins/animations.ts'],
   colorMode: {
     classSuffix: '',
     preference: 'system',

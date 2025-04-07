@@ -74,7 +74,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { useToast } from 'vue-toastification';
+import { useToast } from 'vue-toastification/dist/index.mjs';
 import { useAuth } from '../composables/useAuth';
 import { ArrowLeftIcon } from 'lucide-vue-next';
 import { useHead } from 'unhead';
