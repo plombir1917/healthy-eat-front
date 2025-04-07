@@ -1,23 +1,15 @@
 import { defineNuxtPlugin } from '#app';
-import pkg from 'vue-toastification';
-import 'vue-toastification/dist/index.css';
+import Vue3Toastify from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export default defineNuxtPlugin((nuxtApp) => {
-  const options = {
+  nuxtApp.vueApp.use(Vue3Toastify, {
+    autoClose: 3000,
     position: 'top-right',
-    timeout: 3000,
+    hideProgressBar: false,
     closeOnClick: true,
-    pauseOnFocusLoss: true,
     pauseOnHover: true,
     draggable: true,
-    draggablePercent: 0.6,
-    showCloseButtonOnHover: false,
-    hideProgressBar: false,
-    closeButton: 'button',
-    icon: true,
-    rtl: false,
-    transition: 'Vue-Toastification__fade',
-  };
-
-  nuxtApp.vueApp.use(pkg, options);
+    theme: 'light',
+  });
 });

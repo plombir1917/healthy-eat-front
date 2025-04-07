@@ -94,8 +94,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import pkg from 'vue-toastification';
-const { useToast } = pkg;
+import { toast } from 'vue3-toastify';
 import { useAuth } from '../composables/useAuth';
 import { ArrowLeftIcon } from 'lucide-vue-next';
 import { useHead } from 'unhead';
@@ -138,7 +137,6 @@ const errors = ref({
 });
 
 const router = useRouter();
-const toast = useToast();
 const isLoading = ref(false);
 
 const validateForm = () => {
