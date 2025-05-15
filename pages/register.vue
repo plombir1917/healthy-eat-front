@@ -188,13 +188,16 @@ const handleRegister = async () => {
   isLoading.value = true;
   try {
     const { confirmPassword, ...registerData } = form.value;
-    const response = await fetch('http://localhost:5000/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(registerData),
-    });
+    const response = await fetch(
+      'https://igor-plaxin.ru/healthy-eat/auth/register',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registerData),
+      }
+    );
 
     const data = await response.json();
 

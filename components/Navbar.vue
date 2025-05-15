@@ -2,33 +2,35 @@
   <header
     class="bg-white dark:bg-gray-800 shadow-md transition-all duration-300"
   >
-    <div class="container mx-auto py-4 px-4">
+    <div class="container mx-auto py-2 sm:py-4 px-2 sm:px-4">
       <div class="flex items-center justify-between">
         <!-- Логотип -->
         <NuxtLink
-          to="/admin"
-          class="flex items-center space-x-2 group transition-transform hover:scale-105"
+          to="/admin/dashboard"
+          class="flex items-center space-x-1 sm:space-x-2 group transition-transform hover:scale-105"
         >
           <img
             src="~/assets/images/logo.png"
             alt="Логотип"
-            class="h-10 w-auto transition-transform group-hover:rotate-12"
+            class="h-8 sm:h-10 w-auto transition-transform group-hover:rotate-12"
           />
           <span
-            class="text-xl font-bold text-primary dark:text-white transition-colors"
+            class="text-lg sm:text-xl font-bold text-primary dark:text-white transition-colors"
           >
             Zдоровье
           </span>
         </NuxtLink>
 
         <!-- Уведомления, смена темы и профиль -->
-        <div class="flex items-center space-x-6">
+        <div class="flex items-center space-x-3 sm:space-x-6">
           <button
             @click="showNotifications"
             class="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label="Уведомления"
           >
-            <BellIcon class="w-6 h-6 text-secondary dark:text-gray-300" />
+            <BellIcon
+              class="w-5 h-5 sm:w-6 sm:h-6 text-secondary dark:text-gray-300"
+            />
             <span
               v-if="unreadNotifications > 0"
               class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 animate-pulse"
@@ -155,6 +157,6 @@ const handleLogout = () => {
 
 <style scoped>
 .container {
-  max-width: 1200px;
+  max-width: 1600px;
 }
 </style>

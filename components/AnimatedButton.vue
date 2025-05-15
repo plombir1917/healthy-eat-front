@@ -6,7 +6,7 @@
     :hover="{ scale: 1.05 }"
     :tap="{ scale: 0.95 }"
     :class="[
-      'px-4 py-2 rounded-lg font-medium transition-all duration-200',
+      'px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base',
       variant === 'primary' ? 'bg-primary text-white hover:bg-primary/90' : '',
       variant === 'secondary'
         ? 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'

@@ -146,13 +146,16 @@ const handleLogin = async () => {
 
   isLoading.value = true;
   try {
-    const response = await fetch('http://localhost:5000/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(form.value),
-    });
+    const response = await fetch(
+      'https://igor-plaxin.ru/healthy-eat/auth/login',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form.value),
+      }
+    );
 
     const data = await response.json();
 
