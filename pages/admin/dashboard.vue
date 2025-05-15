@@ -1,219 +1,231 @@
 <template>
-  <div class="space-y-6">
-    <!-- Приветствие -->
-    <div
-      class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-all duration-300"
-    >
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-primary dark:text-white mb-1">
-            Добро пожаловать, {{ userName }}!
-          </h1>
-          <p class="text-secondary dark:text-gray-300">
-            Вот ваш обзор на сегодня
-          </p>
+  <div class="bg-gray-100 dark:bg-gray-900 min-h-screen py-4 sm:py-10">
+    <div class="flex flex-col gap-6">
+      <!-- Приветствие -->
+      <div
+        class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-all duration-300"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-primary dark:text-white mb-1">
+              Добро пожаловать, {{ userName }}!
+            </h1>
+            <p class="text-secondary dark:text-gray-300">
+              Вот ваш обзор на сегодня
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-secondary dark:text-gray-300">
+              {{ currentDate }}
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              {{ currentTime }}
+            </p>
+          </div>
         </div>
-        <div class="text-right">
-          <p class="text-sm text-secondary dark:text-gray-300">
-            {{ currentDate }}
-          </p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">
-            {{ currentTime }}
+      </div>
+
+      <!-- Карточки статистики -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          v-for="(stat, index) in stats"
+          :key="index"
+          class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:translate-y-[-5px]"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 rounded-full" :class="stat.bgColor">
+              <component
+                :is="stat.icon"
+                class="w-6 h-6"
+                :class="stat.iconColor"
+              />
+            </div>
+            <span class="text-sm font-medium" :class="stat.trendColor">
+              {{ stat.trend }}
+              <component :is="stat.trendIcon" class="w-4 h-4 inline" />
+            </span>
+          </div>
+          <h3 class="text-2xl font-bold text-primary dark:text-white mb-1">
+            {{ stat.value }}
+          </h3>
+          <p class="text-secondary dark:text-gray-300 text-sm">
+            {{ stat.label }}
           </p>
         </div>
       </div>
-    </div>
 
-    <!-- Карточки статистики -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Калькулятор калорий -->
       <div
-        v-for="(stat, index) in stats"
-        :key="index"
-        class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:translate-y-[-5px]"
+        class="bg-white dark:bg-gray-800 p-3 sm:p-6 rounded-xl shadow-md transition-all duration-300"
+      >
+        <h2
+          class="text-lg sm:text-xl font-bold text-primary dark:text-white mb-3 sm:mb-4"
+        >
+          Рассчёт суточной нормы калорий
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          <div class="space-y-3 sm:space-y-4">
+            <div>
+              <label
+                class="block text-xs sm:text-sm font-medium text-secondary dark:text-gray-300 mb-1"
+                >Вес (кг)</label
+              >
+              <input
+                v-model.number="weight"
+                type="number"
+                placeholder="Введите ваш вес"
+                class="w-full p-2 sm:p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs sm:text-sm font-medium text-secondary dark:text-gray-300 mb-1"
+                >Рост (см)</label
+              >
+              <input
+                v-model.number="height"
+                type="number"
+                placeholder="Введите ваш рост"
+                class="w-full p-2 sm:p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs sm:text-sm font-medium text-secondary dark:text-gray-300 mb-1"
+                >Возраст</label
+              >
+              <input
+                v-model.number="age"
+                type="number"
+                placeholder="Введите ваш возраст"
+                class="w-full p-2 sm:p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs sm:text-sm font-medium text-secondary dark:text-gray-300 mb-1"
+                >Пол</label
+              >
+              <div
+                class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4"
+              >
+                <label class="flex items-center">
+                  <input
+                    type="radio"
+                    v-model="gender"
+                    value="male"
+                    class="mr-2"
+                  />
+                  <span
+                    class="text-secondary dark:text-gray-300 text-sm sm:text-base"
+                    >Мужской</span
+                  >
+                </label>
+                <label class="flex items-center">
+                  <input
+                    type="radio"
+                    v-model="gender"
+                    value="female"
+                    class="mr-2"
+                  />
+                  <span
+                    class="text-secondary dark:text-gray-300 text-sm sm:text-base"
+                    >Женский</span
+                  >
+                </label>
+              </div>
+            </div>
+            <div>
+              <label
+                class="block text-xs sm:text-sm font-medium text-secondary dark:text-gray-300 mb-1"
+                >Уровень активности</label
+              >
+              <select
+                v-model="activityLevel"
+                class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
+              >
+                <option value="1.2">Сидячий образ жизни</option>
+                <option value="1.375">Легкая активность</option>
+                <option value="1.55">Умеренная активность</option>
+                <option value="1.725">Высокая активность</option>
+                <option value="1.9">Очень высокая активность</option>
+              </select>
+            </div>
+            <button
+              @click="calculateCalories"
+              class="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium"
+            >
+              Рассчитать
+            </button>
+          </div>
+          <div class="flex items-center justify-center">
+            <div
+              v-if="calories"
+              class="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg"
+            >
+              <h3
+                class="text-lg font-medium text-secondary dark:text-gray-300 mb-2"
+              >
+                Ваша суточная норма калорий:
+              </h3>
+              <div
+                class="text-4xl font-bold text-primary dark:text-white mb-2 animate-pulse"
+              >
+                {{ calories }}
+              </div>
+              <p class="text-sm text-secondary dark:text-gray-300">ккал</p>
+            </div>
+            <div v-else class="text-center p-6">
+              <div
+                class="w-32 h-32 mx-auto mb-4 text-gray-300 dark:text-gray-600"
+              >
+                <CalculatorIcon class="w-full h-full" />
+              </div>
+              <p class="text-secondary dark:text-gray-300">
+                Заполните форму для расчета
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Последние активности -->
+      <div
+        class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-all duration-300"
       >
         <div class="flex items-center justify-between mb-4">
-          <div class="p-3 rounded-full" :class="stat.bgColor">
-            <component
-              :is="stat.icon"
-              class="w-6 h-6"
-              :class="stat.iconColor"
-            />
-          </div>
-          <span class="text-sm font-medium" :class="stat.trendColor">
-            {{ stat.trend }}
-            <component :is="stat.trendIcon" class="w-4 h-4 inline" />
-          </span>
-        </div>
-        <h3 class="text-2xl font-bold text-primary dark:text-white mb-1">
-          {{ stat.value }}
-        </h3>
-        <p class="text-secondary dark:text-gray-300 text-sm">
-          {{ stat.label }}
-        </p>
-      </div>
-    </div>
-
-    <!-- Калькулятор калорий -->
-    <div
-      class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-all duration-300"
-    >
-      <h2 class="text-xl font-bold text-primary dark:text-white mb-4">
-        Рассчёт суточной нормы калорий
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-4">
-          <div>
-            <label
-              class="block text-sm font-medium text-secondary dark:text-gray-300 mb-1"
-              >Вес (кг)</label
-            >
-            <input
-              v-model.number="weight"
-              type="number"
-              placeholder="Введите ваш вес"
-              class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
-            />
-          </div>
-          <div>
-            <label
-              class="block text-sm font-medium text-secondary dark:text-gray-300 mb-1"
-              >Рост (см)</label
-            >
-            <input
-              v-model.number="height"
-              type="number"
-              placeholder="Введите ваш рост"
-              class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
-            />
-          </div>
-          <div>
-            <label
-              class="block text-sm font-medium text-secondary dark:text-gray-300 mb-1"
-              >Возраст</label
-            >
-            <input
-              v-model.number="age"
-              type="number"
-              placeholder="Введите ваш возраст"
-              class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
-            />
-          </div>
-          <div>
-            <label
-              class="block text-sm font-medium text-secondary dark:text-gray-300 mb-1"
-              >Пол</label
-            >
-            <div class="flex space-x-4">
-              <label class="flex items-center">
-                <input
-                  type="radio"
-                  v-model="gender"
-                  value="male"
-                  class="mr-2"
-                />
-                <span class="text-secondary dark:text-gray-300">Мужской</span>
-              </label>
-              <label class="flex items-center">
-                <input
-                  type="radio"
-                  v-model="gender"
-                  value="female"
-                  class="mr-2"
-                />
-                <span class="text-secondary dark:text-gray-300">Женский</span>
-              </label>
-            </div>
-          </div>
-          <div>
-            <label
-              class="block text-sm font-medium text-secondary dark:text-gray-300 mb-1"
-              >Уровень активности</label
-            >
-            <select
-              v-model="activityLevel"
-              class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
-            >
-              <option value="1.2">Сидячий образ жизни</option>
-              <option value="1.375">Легкая активность</option>
-              <option value="1.55">Умеренная активность</option>
-              <option value="1.725">Высокая активность</option>
-              <option value="1.9">Очень высокая активность</option>
-            </select>
-          </div>
-          <button
-            @click="calculateCalories"
-            class="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium"
-          >
-            Рассчитать
+          <h2 class="text-xl font-bold text-primary dark:text-white">
+            Последние активности
+          </h2>
+          <button class="text-sm text-primary dark:text-white hover:underline">
+            Смотреть все
           </button>
         </div>
-        <div class="flex items-center justify-center">
+        <div class="space-y-4">
           <div
-            v-if="calories"
-            class="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg"
+            v-for="(activity, index) in recentActivities"
+            :key="index"
+            class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600"
           >
-            <h3
-              class="text-lg font-medium text-secondary dark:text-gray-300 mb-2"
-            >
-              Ваша суточная норма калорий:
-            </h3>
-            <div
-              class="text-4xl font-bold text-primary dark:text-white mb-2 animate-pulse"
-            >
-              {{ calories }}
+            <div class="p-2 rounded-full mr-4" :class="activity.bgColor">
+              <component
+                :is="activity.icon"
+                class="w-5 h-5"
+                :class="activity.iconColor"
+              />
             </div>
-            <p class="text-sm text-secondary dark:text-gray-300">ккал</p>
-          </div>
-          <div v-else class="text-center p-6">
-            <div
-              class="w-32 h-32 mx-auto mb-4 text-gray-300 dark:text-gray-600"
-            >
-              <CalculatorIcon class="w-full h-full" />
+            <div class="flex-1">
+              <h3 class="font-medium text-primary dark:text-white">
+                {{ activity.title }}
+              </h3>
+              <p class="text-sm text-secondary dark:text-gray-300">
+                {{ activity.description }}
+              </p>
             </div>
-            <p class="text-secondary dark:text-gray-300">
-              Заполните форму для расчета
-            </p>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{
+              activity.time
+            }}</span>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Последние активности -->
-    <div
-      class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-all duration-300"
-    >
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold text-primary dark:text-white">
-          Последние активности
-        </h2>
-        <button class="text-sm text-primary dark:text-white hover:underline">
-          Смотреть все
-        </button>
-      </div>
-      <div class="space-y-4">
-        <div
-          v-for="(activity, index) in recentActivities"
-          :key="index"
-          class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600"
-        >
-          <div class="p-2 rounded-full mr-4" :class="activity.bgColor">
-            <component
-              :is="activity.icon"
-              class="w-5 h-5"
-              :class="activity.iconColor"
-            />
-          </div>
-          <div class="flex-1">
-            <h3 class="font-medium text-primary dark:text-white">
-              {{ activity.title }}
-            </h3>
-            <p class="text-sm text-secondary dark:text-gray-300">
-              {{ activity.description }}
-            </p>
-          </div>
-          <span class="text-xs text-gray-500 dark:text-gray-400">{{
-            activity.time
-          }}</span>
         </div>
       </div>
     </div>

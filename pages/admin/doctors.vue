@@ -1,18 +1,18 @@
 <template>
-  <div class="bg-gray-100 dark:bg-gray-900 min-h-screen py-10">
+  <div class="bg-gray-100 dark:bg-gray-900 min-h-screen py-6 sm:py-10">
     <!-- Фильтрация врачей -->
     <div
-      class="max-w-7xl mx-auto px-4 mb-6 flex justify-between items-center gap-4"
+      class="max-w-7xl mx-auto px-2 sm:px-4 mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4"
     >
       <input
         v-model="search"
         type="text"
         placeholder="🔍 Поиск по имени или специальности"
-        class="w-full p-2 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white"
+        class="w-full p-2 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white text-sm sm:text-base"
       />
       <select
         v-model="selectedSpecialty"
-        class="p-2 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white"
+        class="p-2 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white text-sm sm:text-base"
       >
         <option value="">Все специальности</option>
         <option
@@ -27,7 +27,7 @@
 
     <!-- Список карточек врачей -->
     <div
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 max-w-7xl mx-auto px-2 sm:px-4"
     >
       <div
         v-for="(doctor, index) in filteredDoctors"
@@ -39,18 +39,24 @@
         <img
           :src="doctor.avatar"
           alt="Аватар врача"
-          class="w-full h-48 object-cover"
+          class="w-full h-40 sm:h-48 object-cover"
         />
         <!-- Информация о враче -->
-        <div class="p-6">
-          <h2 class="text-xl font-semibold text-primary dark:text-white mb-2">
+        <div class="p-4 sm:p-6">
+          <h2
+            class="text-lg sm:text-xl font-semibold text-primary dark:text-white mb-2"
+          >
             {{ doctor.name }}
           </h2>
-          <p class="text-secondary dark:text-gray-300 mb-2">
+          <p
+            class="text-secondary dark:text-gray-300 mb-2 text-sm sm:text-base"
+          >
             {{ doctor.specialty }}
           </p>
           <!-- Рейтинг врача -->
-          <p class="text-yellow-500 mb-4">⭐ {{ doctor.rating }}/5</p>
+          <p class="text-yellow-500 mb-4 text-sm sm:text-base">
+            ⭐ {{ doctor.rating }}/5
+          </p>
         </div>
       </div>
     </div>
@@ -58,39 +64,49 @@
     <!-- Модальное окно -->
     <div
       v-if="selectedDoctor"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fade-in"
     >
       <div
-        class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-2xl relative"
+        class="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-2xl w-full max-w-xs sm:max-w-2xl relative animate-scale-in"
       >
         <!-- Кнопка закрытия -->
         <button
-          class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 text-xl"
+          class="absolute top-2 right-2 sm:top-4 sm:right-4 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 text-xl"
           @click="closeModal"
         >
           &times;
         </button>
         <!-- Информация о враче -->
-        <div class="flex gap-6">
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
           <img
             :src="selectedDoctor.avatar"
             alt="Фото врача"
-            class="h-48 w-48 rounded-lg object-cover"
+            class="h-32 w-32 sm:h-48 sm:w-48 rounded-lg object-cover mx-auto sm:mx-0"
           />
           <div>
-            <h2 class="text-2xl font-bold text-primary dark:text-white mb-4">
+            <h2
+              class="text-xl sm:text-2xl font-bold text-primary dark:text-white mb-2 sm:mb-4"
+            >
               {{ selectedDoctor.name }}
             </h2>
-            <p class="text-secondary dark:text-gray-300 mb-2">
+            <p
+              class="text-secondary dark:text-gray-300 mb-2 text-sm sm:text-base"
+            >
               <strong>Специальность:</strong> {{ selectedDoctor.specialty }}
             </p>
-            <p class="text-secondary dark:text-gray-300 mb-2">
+            <p
+              class="text-secondary dark:text-gray-300 mb-2 text-sm sm:text-base"
+            >
               <strong>Опыт работы:</strong> {{ selectedDoctor.experience }} лет
             </p>
-            <p class="text-secondary dark:text-gray-300 mb-2">
+            <p
+              class="text-secondary dark:text-gray-300 mb-2 text-sm sm:text-base"
+            >
               <strong>Образование:</strong> {{ selectedDoctor.education }}
             </p>
-            <p class="text-secondary dark:text-gray-300 mb-4">
+            <p
+              class="text-secondary dark:text-gray-300 mb-4 text-sm sm:text-base"
+            >
               <strong>Описание:</strong> {{ selectedDoctor.description }}
             </p>
           </div>
