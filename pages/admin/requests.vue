@@ -1,75 +1,135 @@
 <template>
-  <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm overflow-x-auto">
-    <h1 class="text-xl sm:text-2xl font-semibold text-primary mb-4">Заявки</h1>
-    <table
-      class="w-full min-w-[600px] border-collapse border border-gray-200 text-sm sm:text-base"
-    >
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="border border-gray-200 p-2 text-left">№</th>
-          <th class="border border-gray-200 p-2 text-left">Имя</th>
-          <th class="border border-gray-200 p-2 text-left">Email</th>
-          <th class="border border-gray-200 p-2 text-left">Статус</th>
-          <th class="border border-gray-200 p-2 text-left">Действия</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(request, index) in requests"
-          :key="index"
-          class="hover:bg-gray-50"
+  <div class="bg-gray-100 dark:bg-gray-900 min-h-screen py-10">
+    <div class="max-w-7xl mx-auto px-4 mb-6">
+      <h1 class="text-2xl font-bold text-primary dark:text-white mb-6">
+        Заявки
+      </h1>
+      <div v-if="isLoading" class="flex justify-center items-center py-10">
+        <LoadingSpinner />
+      </div>
+      <div v-else>
+        <div
+          v-if="requests.length === 0"
+          class="text-center text-gray-600 dark:text-gray-400 py-10"
         >
-          <td class="border border-gray-200 p-2">{{ index + 1 }}</td>
-          <td class="border border-gray-200 p-2">{{ request.name }}</td>
-          <td class="border border-gray-200 p-2 break-all">
-            {{ request.email }}
-          </td>
-          <td class="border border-gray-200 p-2">
-            <span :class="getStatusClass(request.status)">{{
-              request.status
-            }}</span>
-          </td>
-          <td class="border border-gray-200 p-2 whitespace-nowrap">
-            <button
-              class="text-blue-500 hover:underline mr-2 text-xs sm:text-base"
-            >
-              Принять
-            </button>
-            <button class="text-red-500 hover:underline text-xs sm:text-base">
-              Отклонить
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          Нет заявок.
+        </div>
+        <div v-else class="overflow-x-auto">
+          <table
+            class="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-md"
+          >
+            <thead>
+              <tr class="bg-gray-50 dark:bg-gray-700 text-left">
+                <th
+                  class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+                >
+                  #
+                </th>
+                <th
+                  class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+                >
+                  ID доктора
+                </th>
+                <th
+                  class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+                >
+                  ID пациента
+                </th>
+                <th
+                  class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+                >
+                  ID рекомендации
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(request, index) in requests"
+                :key="request.id"
+                class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+              >
+                <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                  {{ index + 1 }}
+                </td>
+                <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                  {{ request.doctor_id }}
+                </td>
+                <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                  {{ request.patient_id }}
+                </td>
+                <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                  {{ request.recommendation_id }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-const requests = [
-  { name: 'Иван Иванов', email: 'ivan@example.com', status: 'Ожидание' },
-  { name: 'Мария Смирнова', email: 'maria@example.com', status: 'Принято' },
-  { name: 'Алексей Петров', email: 'alex@example.com', status: 'Отклонено' },
-];
+import { ref, onMounted } from 'vue';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import { toast } from 'vue3-toastify';
 
-const getStatusClass = (status) => {
-  switch (status) {
-    case 'Ожидание':
-      return 'text-yellow-500';
-    case 'Принято':
-      return 'text-green-500';
-    case 'Отклонено':
-      return 'text-red-500';
-    default:
-      return 'text-gray-500';
+const REQUESTS_URL = 'https://igor-plaxin.ru/healthy-eat/request';
+const requests = ref([]);
+const isLoading = ref(true);
+
+const fetchRequests = async () => {
+  isLoading.value = true;
+  try {
+    const res = await fetch(REQUESTS_URL);
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('Ошибка сервера:', errorText);
+      throw new Error(
+        `Ошибка загрузки заявок: ${res.status} ${res.statusText}`
+      );
+    }
+
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Неверный формат ответа от сервера');
+    }
+
+    const data = await res.json();
+    if (!Array.isArray(data)) {
+      throw new Error('Получены данные в неверном формате');
+    }
+
+    requests.value = data;
+  } catch (e) {
+    console.error('Ошибка при загрузке заявок:', e);
+    toast.error(e.message || 'Ошибка загрузки заявок');
+  } finally {
+    isLoading.value = false;
   }
 };
+
+onMounted(fetchRequests);
 </script>
 
 <style scoped>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
 th,
 td {
-  padding: 8px 12px;
+  padding: 12px 16px;
   text-align: left;
+}
+th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+.dark th {
+  background: #374151;
+}
+tr:last-child td {
+  border-bottom: none;
 }
 </style>

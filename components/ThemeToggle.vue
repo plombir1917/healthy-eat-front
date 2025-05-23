@@ -8,8 +8,8 @@
       <span
         class="absolute inset-0 flex items-center justify-center transition-all duration-500 transform"
         :class="{
-          'opacity-0 translate-y-2': colorMode.value === 'dark',
-          'opacity-100 translate-y-0': colorMode.value === 'light',
+          'opacity-0 translate-y-2': isDark,
+          'opacity-100 translate-y-0': !isDark,
         }"
       >
         <SunIcon class="w-5 h-5 text-yellow-500" />
@@ -17,8 +17,8 @@
       <span
         class="absolute inset-0 flex items-center justify-center transition-all duration-500 transform"
         :class="{
-          'opacity-100 translate-y-0': colorMode.value === 'dark',
-          'opacity-0 -translate-y-2': colorMode.value === 'light',
+          'opacity-100 translate-y-0': isDark,
+          'opacity-0 -translate-y-2': !isDark,
         }"
       >
         <MoonIcon class="w-5 h-5 text-blue-400" />
@@ -31,6 +31,18 @@
 import { SunIcon, MoonIcon } from 'lucide-vue-next';
 
 const colorMode = useColorMode();
+const isDark = ref(false);
+
+onMounted(() => {
+  isDark.value = colorMode.value === 'dark';
+});
+
+watch(
+  () => colorMode.value,
+  (newValue) => {
+    isDark.value = newValue === 'dark';
+  }
+);
 
 const toggleTheme = () => {
   colorMode.preference = colorMode.value === 'light' ? 'dark' : 'light';

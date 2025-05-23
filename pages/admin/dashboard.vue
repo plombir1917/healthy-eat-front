@@ -249,7 +249,9 @@ import {
 } from 'lucide-vue-next';
 import { useAuth } from '~/composables/useAuth';
 
-const { isAuthenticated } = useAuth();
+const { isAuthenticated, getToken } = useAuth();
+const adminName = ref('');
+const adminSurname = ref('');
 const userName = ref('Пользователь');
 
 // Данные для калькулятора
@@ -375,12 +377,27 @@ const calculateCalories = () => {
   }
 };
 
+const fetchTokenPayload = async () => {
+  try {
+    const token = getToken();
+    if (!token) return;
+    const res = await fetch(
+      'https://igor-plaxin.ru/healthy-eat/auth/token-payload',
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    adminName.value = data.name || '';
+    adminSurname.value = data.surname || '';
+    userName.value =
+      `${adminName.value} ${adminSurname.value}`.trim() || 'Пользователь';
+  } catch {}
+};
+
 onMounted(() => {
-  // Загрузка данных пользователя
-  if (isAuthenticated()) {
-    // В реальном приложении здесь будет запрос к API
-    userName.value = 'Иван Иванов';
-  }
+  fetchTokenPayload();
 });
 </script>
 
