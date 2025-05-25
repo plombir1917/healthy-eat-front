@@ -130,6 +130,9 @@ import {
   CalendarIcon,
   HeartIcon,
   SettingsIcon,
+  DropletsIcon,
+  ShieldIcon,
+  InfoIcon,
 } from 'lucide-vue-next';
 
 const sidebarOpen = ref(false);
@@ -157,8 +160,15 @@ onUnmounted(() => {
 
 const menuItems = [
   { name: 'Главная', path: '/admin/dashboard', icon: HomeIcon },
+  { name: 'Администраторы', path: '/admin/admins', icon: ShieldIcon },
   { name: 'Пациенты', path: '/admin/patient', icon: UsersIcon },
   { name: 'Врачи', path: '/admin/doctors', icon: AmbulanceIcon },
+  { name: 'Характеристики', path: '/admin/characteristics', icon: InfoIcon },
+  { name: 'Заболевания', path: '/admin/illness', icon: HeartIcon },
+  { name: 'Диеты', path: '/admin/diet', icon: ActivityIcon },
+  { name: 'Дорожные карты', path: '/admin/process-map', icon: CalendarIcon },
+  { name: 'Симптомы', path: '/admin/symptom', icon: DropletsIcon },
+  { name: 'Рекомендации', path: '/admin/recommendation', icon: BarChartIcon },
   { name: 'Заявки', path: '/admin/requests', icon: ClipboardListIcon },
   { name: 'Настройки', path: '/admin/settings', icon: CogIcon },
 ];

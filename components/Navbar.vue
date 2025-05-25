@@ -107,14 +107,37 @@ import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 
 const router = useRouter();
-const { removeToken, isAuthenticated } = useAuth();
-
+const { removeToken, isAuthenticated, getToken } = useAuth();
+const adminName = ref('');
+const adminSurname = ref('');
 const unreadNotifications = ref(3);
 const isProfileMenuOpen = ref(false);
 const userName = ref('Пользователь');
 const userAvatar = ref(
   'https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff'
 );
+
+const fetchTokenPayload = async () => {
+  try {
+    const token = getToken();
+    if (!token) return;
+    const res = await fetch(
+      'https://igor-plaxin.ru/healthy-eat/auth/token-payload',
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    adminName.value = data.name || '';
+    adminSurname.value = data.surname || '';
+    userName.value =
+      `${adminName.value} ${adminSurname.value}`.trim() || 'Пользователь';
+    userAvatar.value = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      userName.value
+    )}&background=3b82f6&color=fff`;
+  } catch {}
+};
 
 // Закрытие меню при клике вне его
 const closeProfileMenu = (e) => {
@@ -125,14 +148,7 @@ const closeProfileMenu = (e) => {
 
 onMounted(() => {
   document.addEventListener('click', closeProfileMenu);
-
-  // Загрузка данных пользователя
-  if (isAuthenticated()) {
-    // В реальном приложении здесь будет запрос к API
-    userName.value = 'Иван Иванов';
-    userAvatar.value =
-      'https://ui-avatars.com/api/?name=Иван+Иванов&background=3b82f6&color=fff';
-  }
+  fetchTokenPayload();
 });
 
 onUnmounted(() => {

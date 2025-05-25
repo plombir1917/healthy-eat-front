@@ -5,7 +5,7 @@
     >
       <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center">
         <img
-          :src="user.avatar"
+          src="/profile.png"
           alt="Аватар"
           class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-primary"
         />
@@ -197,13 +197,9 @@ const { removeToken, isAuthenticated, setToken } = useAuth();
 // Состояние редактирования
 const isEditing = ref(false);
 
-// URL аватарки
-const avatarUrl = ref(
-  'https://ui-avatars.com/api/?name=Иван+Иванов&background=3b82f6&color=fff&size=200'
-);
-
-// Данные пользователя
+// Данные пользователя (пример)
 const user = ref({
+  id: 1,
   name: 'Иван Иванов',
   email: 'ivan.ivanov@example.com',
   age: 25,
@@ -215,44 +211,6 @@ const user = ref({
   status: 'Активный',
   calories: 2200,
   progress: 75,
-  achievements: [
-    {
-      title: 'Сбросил 5 кг за месяц!',
-      description: 'Достигнута цель по снижению веса',
-      date: '15.05.2023',
-      icon: TrendingUpIcon,
-    },
-    {
-      title: 'Прошел 30 тренировок',
-      description: 'Регулярные тренировки в течение месяца',
-      date: '10.06.2023',
-      icon: ActivityIcon,
-    },
-    {
-      title: 'Поднял свой личный рекорд',
-      description: 'Новый рекорд в жиме лежа',
-      date: '22.07.2023',
-      icon: TargetIcon,
-    },
-    {
-      title: '100 дней подряд',
-      description: 'Ежедневное отслеживание питания',
-      date: '05.08.2023',
-      icon: ClockIcon,
-    },
-    {
-      title: 'Здоровый сон',
-      description: 'Средняя продолжительность сна 8 часов',
-      date: '12.09.2023',
-      icon: CheckCircleIcon,
-    },
-    {
-      title: 'Мастер здорового питания',
-      description: 'Следование плану питания 30 дней',
-      date: '01.10.2023',
-      icon: AwardIcon,
-    },
-  ],
 });
 
 // Форма редактирования
@@ -265,9 +223,8 @@ const editForm = ref({
   gender: 'male',
 });
 
-// Прогресс
+// Прогресс (пример)
 const weightProgress = ref(60);
-const activityProgress = ref(85);
 
 // Вычисляемые свойства
 const calculateBMI = computed(() => {
@@ -285,18 +242,6 @@ const bmiCategory = computed(() => {
 });
 
 // Методы
-const handleAvatarUpdate = async (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      avatarUrl.value = e.target.result;
-      await handleProfileUpdate();
-    };
-    reader.readAsDataURL(file);
-  }
-};
-
 const handleProfileUpdate = async () => {
   // В реальном приложении здесь будет запрос к API
   user.value = {
@@ -316,11 +261,12 @@ const handleLogout = () => {
 
 // Инициализация
 onMounted(() => {
-  // Загрузка данных пользователя
+  // Загрузка данных пользователя (в реальном приложении)
   if (isAuthenticated()) {
-    // В реальном приложении здесь будет запрос к API
+    // Пример загрузки данных пользователя (замените на реальный API вызов)
+    // fetchUser().then(data => { user.value = data; });
 
-    // Инициализация формы редактирования
+    // Инициализация формы редактирования из текущих данных пользователя
     editForm.value = {
       name: user.value.name,
       email: user.value.email,
