@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import {
   HomeIcon,
   UsersIcon,
@@ -134,10 +134,13 @@ import {
   ShieldIcon,
   InfoIcon,
 } from 'lucide-vue-next';
+import { useAuth } from '~/composables/useAuth';
 
 const sidebarOpen = ref(false);
 const sidebarRef = ref(null);
 const burgerButtonRef = ref(null);
+const userRole = ref(null);
+const { getToken } = useAuth();
 
 const handleClickOutside = (event) => {
   if (
@@ -150,15 +153,32 @@ const handleClickOutside = (event) => {
   }
 };
 
+const fetchTokenPayload = async () => {
+  try {
+    const token = getToken();
+    if (!token) return;
+    const res = await fetch(
+      'https://igor-plaxin.ru/healthy-eat/auth/token-payload',
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    userRole.value = data.role;
+  } catch {}
+};
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
+  fetchTokenPayload();
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
-const menuItems = [
+const allMenuItems = [
   { name: 'Главная', path: '/admin/dashboard', icon: HomeIcon },
   { name: 'Администраторы', path: '/admin/admins', icon: ShieldIcon },
   { name: 'Пациенты', path: '/admin/patient', icon: UsersIcon },
@@ -172,4 +192,21 @@ const menuItems = [
   { name: 'Заявки', path: '/admin/requests', icon: ClipboardListIcon },
   { name: 'Настройки', path: '/admin/settings', icon: CogIcon },
 ];
+
+const menuItems = computed(() => {
+  if (!userRole.value) return allMenuItems;
+
+  switch (userRole.value) {
+    case 'ADMIN':
+      return allMenuItems;
+    case 'DOCTOR':
+      return allMenuItems.filter((item) => item.name !== 'Администраторы');
+    case 'PATIENT':
+      return allMenuItems.filter(
+        (item) => !['Администраторы', 'Пациенты'].includes(item.name)
+      );
+    default:
+      return allMenuItems;
+  }
+});
 </script>
