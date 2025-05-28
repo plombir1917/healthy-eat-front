@@ -133,6 +133,8 @@ import {
   DropletsIcon,
   ShieldIcon,
   InfoIcon,
+  AlertCircleIcon,
+  StethoscopeIcon,
 } from 'lucide-vue-next';
 import { useAuth } from '~/composables/useAuth';
 
@@ -192,6 +194,16 @@ const allMenuItems = [
     icon: CalendarIcon,
   },
   { name: 'Симптомы', path: '/admin/symptom', icon: DropletsIcon },
+  {
+    name: 'Симптомы заболеваний',
+    path: '/admin/illness-symptoms',
+    icon: AlertCircleIcon,
+  },
+  {
+    name: 'Заболевания пациентов',
+    path: '/admin/patient-illnesses',
+    icon: StethoscopeIcon,
+  },
   { name: 'Рекомендации', path: '/admin/recommendation', icon: BarChartIcon },
   { name: 'Заявки', path: '/admin/requests', icon: ClipboardListIcon },
   { name: 'Настройки', path: '/admin/settings', icon: CogIcon },
