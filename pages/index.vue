@@ -123,27 +123,6 @@
             <div
               class="w-10 h-10 sm:w-14 sm:h-14 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mb-4 sm:mb-6"
             >
-              <MessageSquareIcon
-                class="w-6 h-6 sm:w-7 sm:h-7 text-primary dark:text-white"
-              />
-            </div>
-            <h3
-              class="text-lg sm:text-xl font-semibold text-primary dark:text-white mb-2 sm:mb-3"
-            >
-              Общение с врачом
-            </h3>
-            <p class="text-secondary dark:text-gray-300 text-sm sm:text-base">
-              Возможность задать вопросы врачу и получить подробные комментарии
-              к рекомендациям
-            </p>
-          </div>
-
-          <div
-            class="bg-gray-50 dark:bg-gray-700 p-4 sm:p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div
-              class="w-10 h-10 sm:w-14 sm:h-14 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mb-4 sm:mb-6"
-            >
               <BookOpenIcon
                 class="w-6 h-6 sm:w-7 sm:h-7 text-primary dark:text-white"
               />
@@ -255,6 +234,116 @@
                 Получите персональный план питания с учетом ваших особенностей и
                 рекомендациями врача
               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Технологические карты -->
+    <section class="py-8 sm:py-16 md:py-24 bg-white dark:bg-gray-800">
+      <div class="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-16">
+          <h2
+            class="text-2xl sm:text-3xl md:text-4xl font-bold text-primary dark:text-white mb-2 sm:mb-4"
+          >
+            Технологические карты
+          </h2>
+          <p
+            class="text-base sm:text-xl text-secondary dark:text-gray-300 max-w-3xl mx-auto"
+          >
+            Пошаговые инструкции по приготовлению блюд для различных заболеваний
+            ЖКТ
+          </p>
+        </div>
+
+        <!-- Поиск -->
+        <div class="mb-6">
+          <input
+            v-model="search"
+            type="text"
+            placeholder="🔍 Поиск по названию блюда"
+            class="w-full p-2 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white text-sm sm:text-base"
+          />
+        </div>
+
+        <div v-if="isLoading" class="flex justify-center items-center py-10">
+          <LoadingSpinner />
+        </div>
+
+        <!-- Список технологических карт -->
+        <div v-else class="space-y-4">
+          <div
+            v-if="filteredProcessMaps.length === 0"
+            class="text-center text-gray-600 dark:text-gray-400 py-10"
+          >
+            Технологические карты пока не добавлены
+          </div>
+          <div
+            v-else
+            v-for="item in filteredProcessMaps"
+            :key="item.id"
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300"
+            :class="{
+              'ring-2 ring-primary':
+                selectedItem && selectedItem.id === item.id,
+            }"
+          >
+            <button
+              class="w-full text-left p-4 sm:p-6 focus:outline-none flex justify-between items-center"
+              @click="toggleItem(item)"
+            >
+              <h2
+                class="text-lg sm:text-xl font-semibold text-primary dark:text-white"
+              >
+                {{ item.dish_name }}
+              </h2>
+              <svg
+                :class="[
+                  'w-5 h-5 text-gray-500 transition-transform duration-300',
+                  { 'rotate-180': selectedItem && selectedItem.id === item.id },
+                ]"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            <div
+              v-if="selectedItem && selectedItem.id === item.id"
+              class="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700"
+            >
+              <div
+                class="text-secondary dark:text-gray-300 text-sm sm:text-base space-y-3"
+              >
+                <p><strong>Ингредиенты:</strong> {{ item.ingredients }}</p>
+                <p>
+                  <strong>Процесс приготовления:</strong>
+                  {{ item.cooking_process }}
+                </p>
+                <div>
+                  <h3 class="font-semibold text-primary dark:text-white mb-1">
+                    Пищевая ценность:
+                  </h3>
+                  <ul class="list-disc list-inside ml-4">
+                    <li>Белки: {{ item.proteins }}г</li>
+                    <li>Жиры: {{ item.fats }}г</li>
+                    <li>Углеводы: {{ item.carbohydrates }}г</li>
+                    <li>Калории: {{ item.calories }}ккал</li>
+                  </ul>
+                </div>
+                <p>
+                  <strong>Связанная диета:</strong>
+                  {{ getDietName(item.diet_id) }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -615,6 +704,7 @@
 </template>
 
 <script setup>
+import { ref, onMounted, computed } from 'vue';
 import {
   StethoscopeIcon,
   FilterIcon,
@@ -628,7 +718,63 @@ import {
   MailIcon,
   PhoneIcon,
   MapPinIcon,
+  MapIcon,
 } from 'lucide-vue-next';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
+
+const API_URL = 'https://igor-plaxin.ru/healthy-eat/process-map';
+const DIET_URL = 'https://igor-plaxin.ru/healthy-eat/diet';
+const processMaps = ref([]);
+const diets = ref([]);
+const isLoading = ref(true);
+const search = ref('');
+const selectedItem = ref(null);
+
+const filteredProcessMaps = computed(() => {
+  return processMaps.value.filter((item) =>
+    item.dish_name.toLowerCase().includes(search.value.toLowerCase())
+  );
+});
+
+const fetchProcessMaps = async () => {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error('Ошибка загрузки технологических карт');
+    processMaps.value = await res.json();
+  } catch (e) {
+    console.error(e.message || 'Ошибка загрузки технологических карт');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const fetchDiets = async () => {
+  try {
+    const res = await fetch(DIET_URL);
+    if (!res.ok) throw new Error('Ошибка загрузки диет');
+    diets.value = await res.json();
+  } catch (e) {
+    console.error(e.message || 'Ошибка загрузки диет');
+  }
+};
+
+const getDietName = (dietId) => {
+  if (!dietId) return 'Не привязана';
+  const diet = diets.value.find((d) => d.id === dietId);
+  return diet ? diet.name : 'Неизвестная диета';
+};
+
+const toggleItem = (item) => {
+  if (selectedItem.value && selectedItem.value.id === item.id) {
+    selectedItem.value = null;
+  } else {
+    selectedItem.value = item;
+  }
+};
+
+onMounted(async () => {
+  await Promise.all([fetchProcessMaps(), fetchDiets()]);
+});
 
 definePageMeta({
   layout: 'empty',
