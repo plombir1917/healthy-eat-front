@@ -290,6 +290,8 @@ import {
   ClockIcon,
   CalendarIcon,
   ClipboardListIcon,
+  BookOpenIcon,
+  StethoscopeIcon,
 } from 'lucide-vue-next';
 import { useAuth } from '~/composables/useAuth';
 
@@ -313,6 +315,7 @@ const bmiColor = ref('');
 const bmiProgress = ref(0);
 
 // Статистика
+const API_URL = 'https://igor-plaxin.ru/healthy-eat';
 const stats = ref([
   {
     label: 'Активные пользователи',
@@ -335,60 +338,24 @@ const stats = ref([
     iconColor: 'text-purple-500 dark:text-purple-300',
   },
   {
-    label: 'Средний пульс',
-    value: '72',
+    label: 'Технологические карты',
+    value: '0',
     trend: '-3%',
-    trendColor: 'text-red-500',
-    trendIcon: TrendingDownIcon,
-    icon: HeartIcon,
+    trendColor: 'text-green-500',
+    trendIcon: TrendingUpIcon,
+    icon: BookOpenIcon,
     bgColor: 'bg-red-100 dark:bg-red-900',
     iconColor: 'text-red-500 dark:text-red-300',
   },
   {
-    label: 'Активность',
-    value: '87%',
+    label: 'Врачи',
+    value: '0',
     trend: '+5%',
     trendColor: 'text-green-500',
     trendIcon: TrendingUpIcon,
-    icon: ActivityIcon,
+    icon: StethoscopeIcon,
     bgColor: 'bg-green-100 dark:bg-green-900',
     iconColor: 'text-green-500 dark:text-green-300',
-  },
-]);
-
-// Последние активности
-const recentActivities = ref([
-  {
-    title: 'Завершена тренировка',
-    description: 'Кардио тренировка - 30 минут',
-    time: '10 мин назад',
-    icon: CheckCircleIcon,
-    bgColor: 'bg-green-100 dark:bg-green-900',
-    iconColor: 'text-green-500 dark:text-green-300',
-  },
-  {
-    title: 'Новое уведомление',
-    description: 'Напоминание о приеме витаминов',
-    time: '1 час назад',
-    icon: AlertCircleIcon,
-    bgColor: 'bg-yellow-100 dark:bg-yellow-900',
-    iconColor: 'text-yellow-500 dark:text-yellow-300',
-  },
-  {
-    title: 'Запланирована встреча',
-    description: 'Консультация с врачом',
-    time: '2 часа назад',
-    icon: CalendarIcon,
-    bgColor: 'bg-blue-100 dark:bg-blue-900',
-    iconColor: 'text-blue-500 dark:text-blue-300',
-  },
-  {
-    title: 'Обновлен профиль',
-    description: 'Изменены данные о здоровье',
-    time: '5 часов назад',
-    icon: ClockIcon,
-    bgColor: 'bg-purple-100 dark:bg-purple-900',
-    iconColor: 'text-purple-500 dark:text-purple-300',
   },
 ]);
 
@@ -476,8 +443,53 @@ const fetchTokenPayload = async () => {
   } catch {}
 };
 
-onMounted(() => {
-  fetchTokenPayload();
+const fetchStats = async () => {
+  try {
+    const token = getToken();
+    if (!token) return;
+
+    // Получаем количество пользователей
+    const usersRes = await fetch(`${API_URL}/patient`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (usersRes.ok) {
+      const users = await usersRes.json();
+      stats.value[0].value = users.length.toString();
+    }
+
+    // Получаем количество заявок
+    const requestsRes = await fetch(`${API_URL}/request`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (requestsRes.ok) {
+      const requests = await requestsRes.json();
+      stats.value[1].value = requests.length.toString();
+    }
+
+    // Получаем количество технологических карт
+    const processMapsRes = await fetch(`${API_URL}/process-map`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (processMapsRes.ok) {
+      const processMaps = await processMapsRes.json();
+      stats.value[2].value = processMaps.length.toString();
+    }
+
+    // Получаем количество врачей
+    const doctorsRes = await fetch(`${API_URL}/doctor`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (doctorsRes.ok) {
+      const doctors = await doctorsRes.json();
+      stats.value[3].value = doctors.length.toString();
+    }
+  } catch (e) {
+    console.error('Ошибка загрузки статистики:', e);
+  }
+};
+
+onMounted(async () => {
+  await Promise.all([fetchTokenPayload(), fetchStats()]);
 });
 </script>
 
