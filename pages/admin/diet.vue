@@ -106,13 +106,32 @@
               id="edit-name"
               required
             />
-            <AnimatedInput
-              v-model="editForm.illness_id"
-              label="ID заболевания"
-              type="number"
-              id="edit-illness_id"
-              required
-            />
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Заболевание
+              </label>
+              <select
+                v-model="editForm.illness_id"
+                required
+                class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+              >
+                <option value="">Выберите заболевание</option>
+                <option
+                  v-for="illness in illnesses"
+                  :key="illness.id"
+                  :value="illness.id"
+                >
+                  {{ illness.name }}
+                </option>
+              </select>
+              <span
+                v-if="errors.illness_id"
+                class="text-red-500 text-sm mt-1"
+                >{{ errors.illness_id }}</span
+              >
+            </div>
             <div class="flex gap-2 mt-2">
               <AnimatedButton type="submit" variant="primary" class="w-full"
                 >Сохранить</AnimatedButton
@@ -160,20 +179,35 @@
             type="text"
             id="name"
             required
-            :error="errors.name"
           />
-          <AnimatedInput
-            v-model="form.illness_id"
-            label="ID заболевания"
-            type="number"
-            id="illness_id"
-            required
-            :error="errors.illness_id"
-          />
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Заболевание
+            </label>
+            <select
+              v-model="form.illness_id"
+              required
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Выберите заболевание</option>
+              <option
+                v-for="illness in illnesses"
+                :key="illness.id"
+                :value="illness.id"
+              >
+                {{ illness.name }}
+              </option>
+            </select>
+            <span v-if="errors.illness_id" class="text-red-500 text-sm mt-1">{{
+              errors.illness_id
+            }}</span>
+          </div>
           <AnimatedButton
             type="submit"
             variant="primary"
-            class="w-full"
+            class="w-full mt-2"
             :is-loading="modalLoading"
           >
             Добавить
@@ -263,7 +297,14 @@ const fetchDiets = async () => {
 
 const fetchIllnesses = async () => {
   try {
-    const res = await fetch(ILLNESS_URL);
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(ILLNESS_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (!res.ok) throw new Error('Ошибка загрузки заболеваний');
     illnesses.value = await res.json();
   } catch (e) {

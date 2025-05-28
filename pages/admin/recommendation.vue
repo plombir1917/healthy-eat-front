@@ -107,14 +107,26 @@
           Добавить рекомендацию
         </h2>
         <form @submit.prevent="createRecommendation" class="space-y-4">
-          <AnimatedInput
-            v-model="form.diet_id"
-            label="ID диеты"
-            type="number"
-            id="diet_id"
-            required
-            :error="errors.diet_id"
-          />
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Диета
+            </label>
+            <select
+              v-model="form.diet_id"
+              required
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Выберите диету</option>
+              <option v-for="diet in diets" :key="diet.id" :value="diet.id">
+                {{ diet.name }}
+              </option>
+            </select>
+            <span v-if="errors.diet_id" class="text-red-500 text-sm mt-1">{{
+              errors.diet_id
+            }}</span>
+          </div>
           <AnimatedButton
             type="submit"
             variant="primary"
@@ -145,14 +157,26 @@
           Редактировать рекомендацию
         </h2>
         <form @submit.prevent="saveEditRecommendation" class="space-y-4">
-          <AnimatedInput
-            v-model="editForm.diet_id"
-            label="ID диеты"
-            type="number"
-            id="edit-diet_id"
-            required
-            :error="errors.diet_id"
-          />
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Диета
+            </label>
+            <select
+              v-model="editForm.diet_id"
+              required
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Выберите диету</option>
+              <option v-for="diet in diets" :key="diet.id" :value="diet.id">
+                {{ diet.name }}
+              </option>
+            </select>
+            <span v-if="errors.diet_id" class="text-red-500 text-sm mt-1">{{
+              errors.diet_id
+            }}</span>
+          </div>
           <div class="flex gap-2">
             <AnimatedButton type="submit" variant="primary" class="w-full">
               Сохранить
