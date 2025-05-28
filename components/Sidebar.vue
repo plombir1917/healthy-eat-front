@@ -186,7 +186,11 @@ const allMenuItems = [
   { name: 'Характеристики', path: '/admin/characteristics', icon: InfoIcon },
   { name: 'Заболевания', path: '/admin/illness', icon: HeartIcon },
   { name: 'Диеты', path: '/admin/diet', icon: ActivityIcon },
-  { name: 'Дорожные карты', path: '/admin/process-map', icon: CalendarIcon },
+  {
+    name: 'Технологические карты',
+    path: '/admin/process-map',
+    icon: CalendarIcon,
+  },
   { name: 'Симптомы', path: '/admin/symptom', icon: DropletsIcon },
   { name: 'Рекомендации', path: '/admin/recommendation', icon: BarChartIcon },
   { name: 'Заявки', path: '/admin/requests', icon: ClipboardListIcon },
