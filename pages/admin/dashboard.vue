@@ -189,42 +189,86 @@
         </div>
       </div>
 
-      <!-- Последние активности -->
+      <!-- Калькулятор ИМТ -->
       <div
         class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-all duration-300"
       >
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-xl font-bold text-primary dark:text-white">
-            Последние активности
+            Калькулятор индекса массы тела (ИМТ)
           </h2>
-          <button class="text-sm text-primary dark:text-white hover:underline">
-            Смотреть все
-          </button>
         </div>
-        <div class="space-y-4">
-          <div
-            v-for="(activity, index) in recentActivities"
-            :key="index"
-            class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600"
-          >
-            <div class="p-2 rounded-full mr-4" :class="activity.bgColor">
-              <component
-                :is="activity.icon"
-                class="w-5 h-5"
-                :class="activity.iconColor"
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div>
+              <label
+                class="block text-sm font-medium text-secondary dark:text-gray-300 mb-1"
+                >Вес (кг)</label
+              >
+              <input
+                v-model.number="weight"
+                type="number"
+                placeholder="Введите ваш вес"
+                class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
               />
             </div>
-            <div class="flex-1">
-              <h3 class="font-medium text-primary dark:text-white">
-                {{ activity.title }}
+            <div>
+              <label
+                class="block text-sm font-medium text-secondary dark:text-gray-300 mb-1"
+                >Рост (см)</label
+              >
+              <input
+                v-model.number="height"
+                type="number"
+                placeholder="Введите ваш рост"
+                class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
+              />
+            </div>
+            <button
+              @click="calculateBMI"
+              class="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium"
+            >
+              Рассчитать ИМТ
+            </button>
+          </div>
+          <div class="flex items-center justify-center">
+            <div
+              v-if="bmi"
+              class="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg w-full"
+            >
+              <h3
+                class="text-lg font-medium text-secondary dark:text-gray-300 mb-2"
+              >
+                Ваш индекс массы тела:
               </h3>
-              <p class="text-sm text-secondary dark:text-gray-300">
-                {{ activity.description }}
+              <div
+                class="text-4xl font-bold text-primary dark:text-white mb-2 animate-pulse"
+              >
+                {{ bmi }}
+              </div>
+              <p class="text-sm text-secondary dark:text-gray-300 mb-4">
+                {{ bmiCategory }}
+              </p>
+              <div
+                class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5"
+              >
+                <div
+                  class="h-2.5 rounded-full transition-all duration-300"
+                  :class="bmiColor"
+                  :style="{ width: bmiProgress + '%' }"
+                ></div>
+              </div>
+            </div>
+            <div v-else class="text-center p-6">
+              <div
+                class="w-32 h-32 mx-auto mb-4 text-gray-300 dark:text-gray-600"
+              >
+                <CalculatorIcon class="w-full h-full" />
+              </div>
+              <p class="text-secondary dark:text-gray-300">
+                Заполните форму для расчета
               </p>
             </div>
-            <span class="text-xs text-gray-500 dark:text-gray-400">{{
-              activity.time
-            }}</span>
           </div>
         </div>
       </div>
@@ -261,6 +305,12 @@ const age = ref(25);
 const gender = ref('male');
 const activityLevel = ref('1.55');
 const calories = ref(null);
+
+// ИМТ
+const bmi = ref(null);
+const bmiCategory = ref('');
+const bmiColor = ref('');
+const bmiProgress = ref(0);
 
 // Статистика
 const stats = ref([
@@ -374,6 +424,36 @@ const calculateCalories = () => {
     calories.value = Math.round(bmr * parseFloat(activityLevel.value));
   } else {
     calories.value = 'Заполните все поля!';
+  }
+};
+
+const calculateBMI = () => {
+  if (weight.value && height.value) {
+    const heightInMeters = height.value / 100;
+    const bmiValue = weight.value / (heightInMeters * heightInMeters);
+    bmi.value = bmiValue.toFixed(1);
+
+    // Определение категории ИМТ
+    if (bmiValue < 18.5) {
+      bmiCategory.value = 'Недостаточный вес';
+      bmiColor.value = 'bg-blue-500';
+      bmiProgress.value = 25;
+    } else if (bmiValue < 25) {
+      bmiCategory.value = 'Нормальный вес';
+      bmiColor.value = 'bg-green-500';
+      bmiProgress.value = 50;
+    } else if (bmiValue < 30) {
+      bmiCategory.value = 'Избыточный вес';
+      bmiColor.value = 'bg-yellow-500';
+      bmiProgress.value = 75;
+    } else {
+      bmiCategory.value = 'Ожирение';
+      bmiColor.value = 'bg-red-500';
+      bmiProgress.value = 100;
+    }
+  } else {
+    bmi.value = null;
+    bmiCategory.value = '';
   }
 };
 
