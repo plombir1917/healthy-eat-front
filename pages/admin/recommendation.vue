@@ -49,6 +49,16 @@
               <th
                 class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
               >
+                ID врача
+              </th>
+              <th
+                class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+              >
+                Врач
+              </th>
+              <th
+                class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+              >
                 Действия
               </th>
             </tr>
@@ -64,6 +74,12 @@
               </td>
               <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
                 {{ getDietName(recommendation.diet_id) }}
+              </td>
+              <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                {{ recommendation.doctor_id }}
+              </td>
+              <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                {{ getDoctorName(recommendation.doctor_id) }}
               </td>
               <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
                 <div class="flex gap-2">
@@ -93,13 +109,15 @@
     <div
       v-if="showCreateModal"
       class="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 animate-fade-in overflow-y-auto"
+      @click.self="closeCreateModal"
     >
       <div
         class="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-scale-in my-4 mx-4"
       >
         <button
+          type="button"
           class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl transition-colors"
-          @click="closeCreateModal"
+          @click.stop="closeCreateModal"
         >
           &times;
         </button>
@@ -107,6 +125,121 @@
           Добавить рекомендацию
         </h2>
         <form @submit.prevent="createRecommendation" class="space-y-4">
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Врач
+            </label>
+            <select
+              v-model="form.doctor_id"
+              required
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Выберите врача</option>
+              <option
+                v-for="doctor in doctors"
+                :key="doctor.id"
+                :value="doctor.id"
+              >
+                {{ doctor.name }} {{ doctor.surname }}
+              </option>
+            </select>
+            <span v-if="errors.doctor_id" class="text-red-500 text-sm mt-1">{{
+              errors.doctor_id
+            }}</span>
+          </div>
+
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Заявка
+            </label>
+            <select
+              v-model="form.request_id"
+              required
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+              @change="handleRequestChange($event.target.value)"
+            >
+              <option value="">Выберите заявку</option>
+              <option
+                v-for="request in getPendingRequests"
+                :key="request.id"
+                :value="request.id"
+              >
+                Заявка #{{ request.id }} - Пациент #{{ request.patient_id }}
+              </option>
+            </select>
+            <span v-if="errors.request_id" class="text-red-500 text-sm mt-1">{{
+              errors.request_id
+            }}</span>
+          </div>
+
+          <div v-if="selectedRequest">
+            <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+              Информация о заявке
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              Врач: {{ getDoctorName(selectedRequest.doctor_id) }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              Пациент: {{ getPatientName(selectedRequest.patient_id) }}
+            </p>
+          </div>
+
+          <!-- Информация о пациенте -->
+          <div
+            v-if="selectedPatientInfo"
+            class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg space-y-4"
+          >
+            <div>
+              <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+                Основная информация
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300">
+                Рост: {{ selectedPatientInfo.height || 'Не указан' }} см
+              </p>
+              <p class="text-sm text-gray-600 dark:text-gray-300">
+                Вес: {{ selectedPatientInfo.weight || 'Не указан' }} кг
+              </p>
+            </div>
+
+            <div v-if="selectedPatientInfo.characteristic">
+              <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+                Характеристики
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300">
+                Непереносимость:
+                {{ selectedPatientInfo.characteristic.intolerance }}
+              </p>
+              <p class="text-sm text-gray-600 dark:text-gray-300">
+                Предпочтения:
+                {{ selectedPatientInfo.characteristic.preference }}
+              </p>
+            </div>
+
+            <div v-if="selectedPatientInfo.illnesses.length > 0">
+              <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+                Заболевания и симптомы
+              </h3>
+              <div
+                v-for="illness in selectedPatientInfo.illnesses"
+                :key="illness.name"
+                class="mb-3"
+              >
+                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                  {{ illness.name }}
+                </p>
+                <div v-if="illness.symptoms.length > 0" class="ml-4">
+                  <p class="text-sm text-gray-600 dark:text-gray-300">
+                    Симптомы: {{ illness.symptoms.join(', ') }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div>
             <label
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -148,8 +281,9 @@
         class="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-scale-in my-4 mx-4"
       >
         <button
+          type="button"
           class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl transition-colors"
-          @click="closeEditModal"
+          @click="() => (showEditModal = false)"
         >
           &times;
         </button>
@@ -185,7 +319,7 @@
               type="button"
               variant="secondary"
               class="w-full"
-              @click="closeEditModal"
+              @click="() => (showEditModal = false)"
             >
               Отмена
             </AnimatedButton>
@@ -206,12 +340,32 @@ import { useAuth } from '~/composables/useAuth';
 
 const API_URL = 'https://igor-plaxin.ru/healthy-eat/recommendation';
 const DIET_URL = 'https://igor-plaxin.ru/healthy-eat/diet';
+const PATIENTS_URL = 'https://igor-plaxin.ru/healthy-eat/patient';
+const DOCTORS_URL = 'https://igor-plaxin.ru/healthy-eat/doctor';
+const REQUESTS_URL = 'https://igor-plaxin.ru/healthy-eat/request';
+const ILLNESSES_URL = 'https://igor-plaxin.ru/healthy-eat/illness';
+const SYMPTOMS_URL = 'https://igor-plaxin.ru/healthy-eat/symptome';
+const CHARACTERISTICS_URL = 'https://igor-plaxin.ru/healthy-eat/characteristic';
+const ILLNESS_ON_PATIENT_URL =
+  'https://igor-plaxin.ru/healthy-eat/illness-on-patient';
+const ILLNESS_ON_SYMPTOME_URL =
+  'https://igor-plaxin.ru/healthy-eat/illness-on-symptome';
 const TOKEN_PAYLOAD_URL =
   'https://igor-plaxin.ru/healthy-eat/auth/token-payload';
 const { getToken } = useAuth();
 
 const recommendations = ref([]);
 const diets = ref([]);
+const patients = ref([]);
+const doctors = ref([]);
+const requests = ref([]);
+const illnesses = ref([]);
+const symptoms = ref([]);
+const characteristics = ref([]);
+const patientIllnesses = ref([]);
+const illnessSymptoms = ref([]);
+const selectedPatientInfo = ref(null);
+const selectedRequest = ref(null);
 const isLoading = ref(true);
 const modalLoading = ref(false);
 const search = ref('');
@@ -219,17 +373,23 @@ const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const selectedRecommendation = ref(null);
 const userRole = ref(null);
+const adminId = ref(null);
 
 const form = ref({
   diet_id: '',
+  doctor_id: '',
+  request_id: '',
 });
 
 const editForm = ref({
   diet_id: '',
+  doctor_id: '',
 });
 
 const errors = ref({
   diet_id: '',
+  doctor_id: '',
+  request_id: '',
 });
 
 const filteredRecommendations = computed(() => {
@@ -238,6 +398,35 @@ const filteredRecommendations = computed(() => {
     return dietName.toLowerCase().includes(search.value.toLowerCase());
   });
 });
+
+const closeCreateModal = () => {
+  showCreateModal.value = false;
+  form.value = {
+    diet_id: '',
+    doctor_id: '',
+    request_id: '',
+  };
+  errors.value = {
+    diet_id: '',
+    doctor_id: '',
+    request_id: '',
+  };
+  selectedPatientInfo.value = null;
+  selectedRequest.value = null;
+};
+
+const closeEditModal = () => {
+  showEditModal.value = false;
+  selectedRecommendation.value = null;
+  editForm.value = {
+    diet_id: '',
+    doctor_id: '',
+  };
+  errors.value = {
+    diet_id: '',
+    doctor_id: '',
+  };
+};
 
 const fetchTokenPayload = async () => {
   try {
@@ -281,20 +470,188 @@ const fetchDiets = async () => {
   }
 };
 
+const fetchPatients = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(PATIENTS_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw new Error('Ошибка загрузки пациентов');
+    patients.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки пациентов');
+  }
+};
+
+const fetchDoctors = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(DOCTORS_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw new Error('Ошибка загрузки врачей');
+    doctors.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки врачей');
+  }
+};
+
+const fetchRequests = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(REQUESTS_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw new Error('Ошибка загрузки заявок');
+    requests.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки заявок');
+  }
+};
+
+const getPendingRequests = computed(() => {
+  return requests.value.filter(
+    (request) => request.status === 'SEND' && !request.recommendation_id
+  );
+});
+
+const fetchIllnesses = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(ILLNESSES_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw new Error('Ошибка загрузки заболеваний');
+    illnesses.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки заболеваний');
+  }
+};
+
+const fetchSymptoms = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(SYMPTOMS_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw new Error('Ошибка загрузки симптомов');
+    symptoms.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки симптомов');
+  }
+};
+
+const fetchCharacteristics = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(CHARACTERISTICS_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw new Error('Ошибка загрузки характеристик');
+    characteristics.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки характеристик');
+  }
+};
+
+const fetchPatientIllnesses = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(ILLNESS_ON_PATIENT_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok)
+      throw new Error('Ошибка загрузки связей заболеваний с пациентами');
+    patientIllnesses.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки связей заболеваний с пациентами');
+  }
+};
+
+const fetchIllnessSymptoms = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(ILLNESS_ON_SYMPTOME_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok)
+      throw new Error('Ошибка загрузки связей заболеваний с симптомами');
+    illnessSymptoms.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки связей заболеваний с симптомами');
+  }
+};
+
 const getDietName = (dietId) => {
   if (!dietId) return '-';
   const diet = diets.value.find((d) => d.id === dietId);
   return diet ? diet.name : 'Неизвестная диета';
 };
 
+const getDoctorName = (doctorId) => {
+  if (!doctorId) return '-';
+  const doctor = doctors.value.find((d) => d.id === doctorId);
+  return doctor ? `${doctor.name} ${doctor.surname}` : 'Неизвестный врач';
+};
+
+const getPatientName = (patientId) => {
+  if (!patientId) return '-';
+  const patient = patients.value.find((p) => p.id === patientId);
+  return patient ? `${patient.name} ${patient.surname}` : 'Неизвестный пациент';
+};
+
 const validateForm = (formData) => {
   let valid = true;
   errors.value = {
     diet_id: '',
+    doctor_id: '',
+    request_id: '',
   };
 
   if (!formData.diet_id) {
     errors.value.diet_id = 'ID диеты обязательно';
+    valid = false;
+  }
+
+  if (!formData.doctor_id) {
+    errors.value.doctor_id = 'ID врача обязательно';
+    valid = false;
+  }
+
+  if (!formData.request_id) {
+    errors.value.request_id = 'ID заявки обязательно';
     valid = false;
   }
 
@@ -310,8 +667,8 @@ const createRecommendation = async () => {
     if (!token) throw new Error('Токен авторизации не найден');
 
     const payload = {
-      ...form.value,
       diet_id: parseInt(form.value.diet_id),
+      doctor_id: parseInt(form.value.doctor_id),
     };
 
     const res = await fetch(API_URL, {
@@ -324,9 +681,30 @@ const createRecommendation = async () => {
     });
 
     if (!res.ok) throw new Error('Ошибка создания рекомендации');
+
+    const newRecommendation = await res.json();
+
+    // Обновляем заявку, связывая её с новой рекомендацией
+    const updateRequestRes = await fetch(
+      `${REQUESTS_URL}/${form.value.request_id}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          recommendation_id: newRecommendation.id,
+          status: 'APPROVED',
+        }),
+      }
+    );
+
+    if (!updateRequestRes.ok) throw new Error('Ошибка обновления заявки');
+
     toast.success('Рекомендация успешно добавлена');
     closeCreateModal();
-    fetchRecommendations(); // Обновить список рекомендаций после добавления
+    await Promise.all([fetchRecommendations(), fetchRequests()]);
   } catch (e) {
     toast.error(e.message || 'Ошибка создания рекомендации');
   } finally {
@@ -338,28 +716,42 @@ const openCreateModal = () => {
   showCreateModal.value = true;
   form.value = {
     diet_id: '',
+    doctor_id: '',
+    request_id: '',
   };
   errors.value = {
     diet_id: '',
+    doctor_id: '',
+    request_id: '',
   };
-};
-
-const closeCreateModal = () => {
-  showCreateModal.value = false;
+  selectedPatientInfo.value = null;
+  selectedRequest.value = null;
 };
 
 const openEditModal = (recommendation) => {
-  selectedRecommendation.value = recommendation;
-  editForm.value = {
-    diet_id: recommendation.diet_id,
-  };
-  showEditModal.value = true;
+  try {
+    selectedRecommendation.value = recommendation;
+    editForm.value = {
+      diet_id: recommendation.diet_id,
+    };
+    errors.value = {
+      diet_id: '',
+    };
+    showEditModal.value = true;
+  } catch (e) {
+    toast.error('Ошибка при открытии формы редактирования');
+    console.error(e);
+  }
 };
 
 const saveEditRecommendation = async () => {
   if (!validateForm(editForm.value)) return;
-  if (!selectedRecommendation.value) return;
+  if (!selectedRecommendation.value) {
+    toast.error('Не выбрана рекомендация для редактирования');
+    return;
+  }
 
+  modalLoading.value = true;
   try {
     const token = getToken();
     if (!token) throw new Error('Токен авторизации не найден');
@@ -378,12 +770,18 @@ const saveEditRecommendation = async () => {
       body: JSON.stringify(payload),
     });
 
-    if (!res.ok) throw new Error('Ошибка при обновлении данных');
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Ошибка при обновлении данных');
+    }
+
     toast.success('Данные рекомендации обновлены');
     closeEditModal();
-    fetchRecommendations(); // Обновить список рекомендаций после редактирования
+    await fetchRecommendations(); // Обновить список рекомендаций после редактирования
   } catch (e) {
     toast.error(e.message || 'Ошибка при обновлении данных');
+  } finally {
+    modalLoading.value = false;
   }
 };
 
@@ -409,8 +807,65 @@ const deleteRecommendation = async (recommendation) => {
   }
 };
 
+const getPatientInfo = (patientId) => {
+  const patient = patients.value.find((p) => p.id === parseInt(patientId));
+  if (!patient) return null;
+
+  const patientIllnessesList = patientIllnesses.value
+    .filter((pi) => pi.patient_id === parseInt(patientId))
+    .map((pi) => {
+      const illness = illnesses.value.find((i) => i.id === pi.illness_id);
+      const illnessSymptomsList = illnessSymptoms.value
+        .filter((is) => is.illness_id === pi.illness_id)
+        .map((is) => {
+          const symptom = symptoms.value.find((s) => s.id === is.symptome_id);
+          return symptom ? symptom.name : null;
+        })
+        .filter(Boolean);
+
+      return {
+        name: illness ? illness.name : 'Неизвестное заболевание',
+        symptoms: illnessSymptomsList,
+      };
+    });
+
+  const characteristic = characteristics.value.find(
+    (c) => c.patient_id === parseInt(patientId)
+  );
+
+  return {
+    ...patient,
+    illnesses: patientIllnessesList,
+    characteristic: characteristic || null,
+  };
+};
+
+const handlePatientChange = (patientId) => {
+  selectedPatientInfo.value = getPatientInfo(patientId);
+};
+
+const handleRequestChange = (requestId) => {
+  const request = requests.value.find((r) => r.id === parseInt(requestId));
+  if (request) {
+    selectedRequest.value = request;
+    form.value.doctor_id = request.doctor_id.toString();
+    handlePatientChange(request.patient_id.toString());
+  }
+};
+
 onMounted(async () => {
   await fetchTokenPayload();
-  await Promise.all([fetchRecommendations(), fetchDiets()]);
+  await Promise.all([
+    fetchRecommendations(),
+    fetchDiets(),
+    fetchPatients(),
+    fetchDoctors(),
+    fetchRequests(),
+    fetchIllnesses(),
+    fetchSymptoms(),
+    fetchCharacteristics(),
+    fetchPatientIllnesses(),
+    fetchIllnessSymptoms(),
+  ]);
 });
 </script>

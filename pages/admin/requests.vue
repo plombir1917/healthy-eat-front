@@ -61,7 +61,17 @@
               <th
                 class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
               >
+                Доктор
+              </th>
+              <th
+                class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+              >
                 ID пациента
+              </th>
+              <th
+                class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+              >
+                Пациент
               </th>
               <th
                 class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
@@ -93,7 +103,13 @@
                 {{ request.doctor_id }}
               </td>
               <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                {{ getDoctorName(request.doctor_id) }}
+              </td>
+              <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
                 {{ request.patient_id }}
+              </td>
+              <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                {{ getPatientName(request.patient_id) }}
               </td>
               <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
                 {{ request.recommendation_id }}
@@ -142,7 +158,10 @@
                     ✎
                   </button>
                   <button
-                    v-if="userRole === 'ADMIN'"
+                    v-if="
+                      userRole === 'ADMIN' ||
+                      (userRole === 'PATIENT' && request.patient_id === adminId)
+                    "
                     @click="deleteRequest(request)"
                     class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
                     title="Удалить"
@@ -190,7 +209,7 @@
               </option>
             </select>
           </div>
-          <div>
+          <div v-if="userRole === 'ADMIN'">
             <label
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
@@ -210,27 +229,18 @@
                 {{ patient.name }} {{ patient.surname }}
               </option>
             </select>
+            <span v-if="errors.patient_id" class="text-red-500 text-sm mt-1">{{
+              errors.patient_id
+            }}</span>
           </div>
-          <div>
-            <label
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Рекомендация (необязательно)
-            </label>
-            <select
-              v-model="form.recommendation_id"
-              class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Выберите рекомендацию</option>
-              <option
-                v-for="recommendation in recommendations"
-                :key="recommendation.id"
-                :value="recommendation.id"
-              >
-                Рекомендация #{{ recommendation.id }}
-              </option>
-            </select>
-          </div>
+          <AnimatedInput
+            v-model="form.description"
+            label="Описание"
+            type="text"
+            id="description"
+            required
+            :error="errors.description"
+          />
           <div class="flex gap-2">
             <button
               type="submit"
@@ -285,7 +295,7 @@
               </option>
             </select>
           </div>
-          <div>
+          <div v-if="userRole !== 'PATIENT'">
             <label
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
@@ -370,6 +380,7 @@ import { ref, computed, onMounted } from 'vue';
 import { toast } from 'vue3-toastify';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import AnimatedButton from '@/components/AnimatedButton.vue';
+import AnimatedInput from '@/components/AnimatedInput.vue';
 import { useAuth } from '~/composables/useAuth';
 
 const API_URL = 'https://igor-plaxin.ru/healthy-eat/request';
@@ -393,13 +404,17 @@ const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const userRole = ref(null);
 const selectedRequest = ref(null);
+const adminId = ref(null);
 
 const form = ref({
   doctor_id: '',
   patient_id: '',
   recommendation_id: '',
   status: 'SEND',
+  description: '',
 });
+
+const errors = ref({});
 
 const filteredRequests = computed(() => {
   return requests.value.filter((request) => {
@@ -424,6 +439,19 @@ const getStatusText = (status) => {
   return statusMap[status] || status;
 };
 
+const getDoctorName = (doctorId) => {
+  if (!doctorId) return '-';
+  const doctor = doctors.value.find((d) => d.id === doctorId);
+  return doctor ? `${doctor.name} ${doctor.surname}` : 'Неизвестный врач';
+};
+
+const getPatientName = (patientId) => {
+  if (!patientId) return '-';
+  const patient = patients.value.find((p) => p.id === patientId);
+  if (!patient) return 'Неизвестный пациент';
+  return patient.surname ? `${patient.name} ${patient.surname}` : patient.name;
+};
+
 const fetchTokenPayload = async () => {
   try {
     const token = getToken();
@@ -438,6 +466,7 @@ const fetchTokenPayload = async () => {
     if (!res.ok) throw new Error('Ошибка получения данных токена');
     const data = await res.json();
     userRole.value = data.role;
+    adminId.value = data.id;
   } catch (e) {
     toast.error(e.message || 'Ошибка получения данных токена');
   }
@@ -523,9 +552,10 @@ const createRequest = async () => {
       doctor_id: parseInt(form.value.doctor_id),
       patient_id: parseInt(form.value.patient_id),
       status: 'SEND',
+      description: form.value.description,
     };
 
-    if (form.value.recommendation_id) {
+    if (form.value.recommendation_id && userRole.value !== 'PATIENT') {
       payload.recommendation_id = parseInt(form.value.recommendation_id);
     }
 
@@ -595,9 +625,10 @@ const openCreateModal = () => {
   showCreateModal.value = true;
   form.value = {
     doctor_id: '',
-    patient_id: '',
+    patient_id: userRole.value === 'PATIENT' ? adminId.value : '',
     recommendation_id: '',
     status: 'SEND',
+    description: '',
   };
 };
 
@@ -612,6 +643,7 @@ const openEditModal = (request) => {
     patient_id: request.patient_id.toString(),
     recommendation_id: request.recommendation_id?.toString() || '',
     status: request.status,
+    description: request.description || '',
   };
   showEditModal.value = true;
 };
@@ -624,6 +656,7 @@ const closeEditModal = () => {
     patient_id: '',
     recommendation_id: '',
     status: 'SEND',
+    description: '',
   };
 };
 
@@ -636,6 +669,7 @@ const updateRequest = async () => {
       doctor_id: parseInt(form.value.doctor_id),
       patient_id: parseInt(form.value.patient_id),
       status: form.value.status,
+      description: form.value.description,
     };
 
     if (form.value.recommendation_id) {

@@ -6,7 +6,7 @@
           Характеристики пациентов
         </h1>
         <AnimatedButton
-          v-if="userRole === 'ADMIN'"
+          v-if="userRole === 'ADMIN' || userRole === 'PATIENT'"
           @click="openCreateModal"
           variant="primary"
         >
@@ -45,7 +45,14 @@
             >
               <strong>Предпочтения:</strong> {{ characteristic.preference }}
             </p>
-            <div v-if="userRole === 'ADMIN'" class="flex gap-2 mt-4">
+            <div
+              v-if="
+                userRole === 'ADMIN' ||
+                (userRole === 'PATIENT' &&
+                  characteristic.patient_id === currentPatientId)
+              "
+              class="flex gap-2 mt-4"
+            >
               <button
                 class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded-lg transition text-sm w-full"
                 @click="openEditModal(characteristic)"
@@ -80,6 +87,7 @@
         class="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-scale-in my-4 mx-4"
       >
         <button
+          type="button"
           class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl transition-colors"
           @click="closeCreateModal"
         >
@@ -89,23 +97,7 @@
           Добавить характеристику
         </h2>
         <form @submit.prevent="createCharacteristic" class="space-y-4">
-          <AnimatedInput
-            v-model="form.intolerance"
-            label="Непереносимость"
-            type="text"
-            id="intolerance"
-            required
-            :error="errors.intolerance"
-          />
-          <AnimatedInput
-            v-model="form.preference"
-            label="Предпочтения"
-            type="text"
-            id="preference"
-            required
-            :error="errors.preference"
-          />
-          <div>
+          <div v-if="userRole === 'ADMIN'">
             <label
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
@@ -130,6 +122,23 @@
             }}</span>
           </div>
 
+          <AnimatedInput
+            v-model="form.intolerance"
+            label="Непереносимость"
+            type="text"
+            id="intolerance"
+            required
+            :error="errors.intolerance"
+          />
+          <AnimatedInput
+            v-model="form.preference"
+            label="Предпочтения"
+            type="text"
+            id="preference"
+            required
+            :error="errors.preference"
+          />
+
           <AnimatedButton
             type="submit"
             variant="primary"
@@ -151,6 +160,7 @@
         class="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-scale-in my-4 mx-4"
       >
         <button
+          type="button"
           class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl transition-colors"
           @click="closeEditModal"
         >
@@ -176,7 +186,7 @@
             required
             :error="errors.preference"
           />
-          <div>
+          <div v-if="userRole === 'ADMIN'">
             <label
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
@@ -242,6 +252,7 @@ const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const selectedCharacteristic = ref(null);
 const userRole = ref(null);
+const currentPatientId = ref(null);
 
 const form = ref({
   intolerance: '',
@@ -275,6 +286,9 @@ const fetchTokenPayload = async () => {
     if (!res.ok) throw new Error('Ошибка получения данных токена');
     const data = await res.json();
     userRole.value = data.role;
+    if (data.role === 'PATIENT') {
+      currentPatientId.value = data.id;
+    }
   } catch (e) {
     toast.error(e.message || 'Ошибка получения данных токена');
   }
@@ -297,9 +311,26 @@ const fetchPatients = async () => {
   }
 };
 
-const fetchCharacteristics = async () => {
-  if (userRole.value !== 'ADMIN') return; // Fetch only if admin
+const getPatientId = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
 
+    const res = await fetch(TOKEN_PAYLOAD_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw new Error('Ошибка получения данных токена');
+    const data = await res.json();
+    return data.id;
+  } catch (e) {
+    toast.error(e.message || 'Ошибка получения ID пациента');
+    return null;
+  }
+};
+
+const fetchCharacteristics = async () => {
   isLoading.value = true;
   try {
     const token = getToken();
@@ -311,7 +342,17 @@ const fetchCharacteristics = async () => {
       },
     });
     if (!res.ok) throw new Error('Ошибка загрузки характеристик');
-    characteristics.value = await res.json();
+    const data = await res.json();
+
+    // Если пользователь с ролью PATIENT, фильтруем только его характеристики
+    if (userRole.value === 'PATIENT') {
+      const patientId = await getPatientId();
+      characteristics.value = data.filter(
+        (char) => char.patient_id === patientId
+      );
+    } else {
+      characteristics.value = data;
+    }
   } catch (e) {
     toast.error(e.message || 'Ошибка загрузки характеристик');
   } finally {
@@ -347,51 +388,8 @@ const validateForm = (formData) => {
   return valid;
 };
 
-const createCharacteristic = async () => {
-  if (!validateForm(form.value)) return;
-  if (userRole.value !== 'ADMIN') {
-    toast.error('У вас нет прав для выполнения этого действия');
-    return;
-  }
-
-  modalLoading.value = true;
-  try {
-    const token = getToken();
-    if (!token) throw new Error('Токен авторизации не найден');
-
-    const payload = {
-      ...form.value,
-      patient_id:
-        form.value.patient_id === null || form.value.patient_id === ''
-          ? null
-          : Number(form.value.patient_id),
-    };
-
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || 'Ошибка создания характеристики');
-    }
-    toast.success('Характеристика успешно добавлена');
-    closeCreateModal();
-    fetchCharacteristics();
-  } catch (e) {
-    toast.error(e.message || 'Ошибка создания характеристики');
-  } finally {
-    modalLoading.value = false;
-  }
-};
-
-const openCreateModal = () => {
-  if (userRole.value !== 'ADMIN') {
+const openCreateModal = async () => {
+  if (userRole.value !== 'ADMIN' && userRole.value !== 'PATIENT') {
     toast.error('У вас нет прав для выполнения этого действия');
     return;
   }
@@ -406,17 +404,33 @@ const openCreateModal = () => {
     preference: '',
     patient_id: '',
   };
+
+  // Если пользователь с ролью PATIENT, автоматически устанавливаем его ID
+  if (userRole.value === 'PATIENT') {
+    const patientId = await getPatientId();
+    form.value.patient_id = patientId;
+  }
 };
 
 const closeCreateModal = () => {
   showCreateModal.value = false;
 };
 
-const openEditModal = (characteristic) => {
-  if (userRole.value !== 'ADMIN') {
+const openEditModal = async (characteristic) => {
+  if (userRole.value !== 'ADMIN' && userRole.value !== 'PATIENT') {
     toast.error('У вас нет прав для выполнения этого действия');
     return;
   }
+
+  // Проверяем, может ли пользователь редактировать эту характеристику
+  if (
+    userRole.value === 'PATIENT' &&
+    characteristic.patient_id !== currentPatientId.value
+  ) {
+    toast.error('Вы можете редактировать только свои характеристики');
+    return;
+  }
+
   selectedCharacteristic.value = characteristic;
   editForm.value = {
     intolerance: characteristic.intolerance,
@@ -428,15 +442,30 @@ const openEditModal = (characteristic) => {
 
 const saveEditCharacteristic = async () => {
   if (!validateForm(editForm.value)) return;
-  if (userRole.value !== 'ADMIN') {
+  if (userRole.value !== 'ADMIN' && userRole.value !== 'PATIENT') {
     toast.error('У вас нет прав для выполнения этого действия');
     return;
   }
+
+  // Проверяем, может ли пользователь редактировать эту характеристику
+  if (
+    userRole.value === 'PATIENT' &&
+    selectedCharacteristic.value.patient_id !== currentPatientId.value
+  ) {
+    toast.error('Вы можете редактировать только свои характеристики');
+    return;
+  }
+
   if (!selectedCharacteristic.value) return;
 
   try {
     const token = getToken();
     if (!token) throw new Error('Токен авторизации не найден');
+
+    // Если пользователь с ролью PATIENT, используем его ID
+    if (userRole.value === 'PATIENT') {
+      editForm.value.patient_id = currentPatientId.value;
+    }
 
     const payload = {
       ...editForm.value,
@@ -468,10 +497,27 @@ const saveEditCharacteristic = async () => {
 };
 
 const deleteCharacteristic = async (id) => {
-  if (userRole.value !== 'ADMIN') {
+  if (userRole.value !== 'ADMIN' && userRole.value !== 'PATIENT') {
     toast.error('У вас нет прав для выполнения этого действия');
     return;
   }
+
+  // Находим характеристику для проверки
+  const characteristic = characteristics.value.find((c) => c.id === id);
+  if (!characteristic) {
+    toast.error('Характеристика не найдена');
+    return;
+  }
+
+  // Проверяем, может ли пользователь удалить эту характеристику
+  if (
+    userRole.value === 'PATIENT' &&
+    characteristic.patient_id !== currentPatientId.value
+  ) {
+    toast.error('Вы можете удалять только свои характеристики');
+    return;
+  }
+
   if (!confirm('Вы действительно хотите удалить эту характеристику?')) return;
 
   try {
@@ -501,6 +547,55 @@ const deleteCharacteristic = async (id) => {
 const closeEditModal = () => {
   showEditModal.value = false;
   selectedCharacteristic.value = null;
+};
+
+const createCharacteristic = async () => {
+  if (!validateForm(form.value)) return;
+  if (userRole.value !== 'ADMIN' && userRole.value !== 'PATIENT') {
+    toast.error('У вас нет прав для выполнения этого действия');
+    return;
+  }
+
+  modalLoading.value = true;
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    // Если пользователь с ролью PATIENT, используем его ID
+    if (userRole.value === 'PATIENT') {
+      const patientId = await getPatientId();
+      form.value.patient_id = patientId;
+    }
+
+    const payload = {
+      ...form.value,
+      patient_id:
+        form.value.patient_id === null || form.value.patient_id === ''
+          ? null
+          : Number(form.value.patient_id),
+    };
+
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Ошибка создания характеристики');
+    }
+    toast.success('Характеристика успешно добавлена');
+    closeCreateModal();
+    fetchCharacteristics();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка создания характеристики');
+  } finally {
+    modalLoading.value = false;
+  }
 };
 
 onMounted(async () => {
