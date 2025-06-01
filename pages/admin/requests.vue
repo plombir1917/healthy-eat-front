@@ -61,7 +61,17 @@
               <th
                 class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
               >
+                Доктор
+              </th>
+              <th
+                class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+              >
                 ID пациента
+              </th>
+              <th
+                class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+              >
+                Пациент
               </th>
               <th
                 class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
@@ -93,7 +103,13 @@
                 {{ request.doctor_id }}
               </td>
               <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                {{ getDoctorName(request.doctor_id) }}
+              </td>
+              <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
                 {{ request.patient_id }}
+              </td>
+              <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                {{ getPatientName(request.patient_id) }}
               </td>
               <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
                 {{ request.recommendation_id }}
@@ -421,6 +437,19 @@ const getStatusText = (status) => {
     REJECTED: 'Отклонено',
   };
   return statusMap[status] || status;
+};
+
+const getDoctorName = (doctorId) => {
+  if (!doctorId) return '-';
+  const doctor = doctors.value.find((d) => d.id === doctorId);
+  return doctor ? `${doctor.name} ${doctor.surname}` : 'Неизвестный врач';
+};
+
+const getPatientName = (patientId) => {
+  if (!patientId) return '-';
+  const patient = patients.value.find((p) => p.id === patientId);
+  if (!patient) return 'Неизвестный пациент';
+  return patient.surname ? `${patient.name} ${patient.surname}` : patient.name;
 };
 
 const fetchTokenPayload = async () => {

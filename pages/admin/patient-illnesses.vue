@@ -217,7 +217,8 @@ const filteredLinks = computed(() => {
 
 const getPatientName = (id) => {
   const patient = patients.value.find((p) => p.id === id);
-  return patient ? `${patient.name} ${patient.surname}` : 'Неизвестный пациент';
+  if (!patient) return 'Неизвестный пациент';
+  return patient.surname ? `${patient.name} ${patient.surname}` : patient.name;
 };
 
 const getIllnessName = (id) => {
