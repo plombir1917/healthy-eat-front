@@ -189,42 +189,86 @@
         </div>
       </div>
 
-      <!-- Последние активности -->
+      <!-- Калькулятор ИМТ -->
       <div
         class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-all duration-300"
       >
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-xl font-bold text-primary dark:text-white">
-            Последние активности
+            Калькулятор индекса массы тела (ИМТ)
           </h2>
-          <button class="text-sm text-primary dark:text-white hover:underline">
-            Смотреть все
-          </button>
         </div>
-        <div class="space-y-4">
-          <div
-            v-for="(activity, index) in recentActivities"
-            :key="index"
-            class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600"
-          >
-            <div class="p-2 rounded-full mr-4" :class="activity.bgColor">
-              <component
-                :is="activity.icon"
-                class="w-5 h-5"
-                :class="activity.iconColor"
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div>
+              <label
+                class="block text-sm font-medium text-secondary dark:text-gray-300 mb-1"
+                >Вес (кг)</label
+              >
+              <input
+                v-model.number="weight"
+                type="number"
+                placeholder="Введите ваш вес"
+                class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
               />
             </div>
-            <div class="flex-1">
-              <h3 class="font-medium text-primary dark:text-white">
-                {{ activity.title }}
+            <div>
+              <label
+                class="block text-sm font-medium text-secondary dark:text-gray-300 mb-1"
+                >Рост (см)</label
+              >
+              <input
+                v-model.number="height"
+                type="number"
+                placeholder="Введите ваш рост"
+                class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
+              />
+            </div>
+            <button
+              @click="calculateBMI"
+              class="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium"
+            >
+              Рассчитать ИМТ
+            </button>
+          </div>
+          <div class="flex items-center justify-center">
+            <div
+              v-if="bmi"
+              class="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg w-full"
+            >
+              <h3
+                class="text-lg font-medium text-secondary dark:text-gray-300 mb-2"
+              >
+                Ваш индекс массы тела:
               </h3>
-              <p class="text-sm text-secondary dark:text-gray-300">
-                {{ activity.description }}
+              <div
+                class="text-4xl font-bold text-primary dark:text-white mb-2 animate-pulse"
+              >
+                {{ bmi }}
+              </div>
+              <p class="text-sm text-secondary dark:text-gray-300 mb-4">
+                {{ bmiCategory }}
+              </p>
+              <div
+                class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5"
+              >
+                <div
+                  class="h-2.5 rounded-full transition-all duration-300"
+                  :class="bmiColor"
+                  :style="{ width: bmiProgress + '%' }"
+                ></div>
+              </div>
+            </div>
+            <div v-else class="text-center p-6">
+              <div
+                class="w-32 h-32 mx-auto mb-4 text-gray-300 dark:text-gray-600"
+              >
+                <CalculatorIcon class="w-full h-full" />
+              </div>
+              <p class="text-secondary dark:text-gray-300">
+                Заполните форму для расчета
               </p>
             </div>
-            <span class="text-xs text-gray-500 dark:text-gray-400">{{
-              activity.time
-            }}</span>
           </div>
         </div>
       </div>
@@ -246,6 +290,8 @@ import {
   ClockIcon,
   CalendarIcon,
   ClipboardListIcon,
+  BookOpenIcon,
+  StethoscopeIcon,
 } from 'lucide-vue-next';
 import { useAuth } from '~/composables/useAuth';
 
@@ -262,7 +308,14 @@ const gender = ref('male');
 const activityLevel = ref('1.55');
 const calories = ref(null);
 
+// ИМТ
+const bmi = ref(null);
+const bmiCategory = ref('');
+const bmiColor = ref('');
+const bmiProgress = ref(0);
+
 // Статистика
+const API_URL = 'https://igor-plaxin.ru/healthy-eat';
 const stats = ref([
   {
     label: 'Активные пользователи',
@@ -285,60 +338,24 @@ const stats = ref([
     iconColor: 'text-purple-500 dark:text-purple-300',
   },
   {
-    label: 'Средний пульс',
-    value: '72',
+    label: 'Технологические карты',
+    value: '0',
     trend: '-3%',
-    trendColor: 'text-red-500',
-    trendIcon: TrendingDownIcon,
-    icon: HeartIcon,
+    trendColor: 'text-green-500',
+    trendIcon: TrendingUpIcon,
+    icon: BookOpenIcon,
     bgColor: 'bg-red-100 dark:bg-red-900',
     iconColor: 'text-red-500 dark:text-red-300',
   },
   {
-    label: 'Активность',
-    value: '87%',
+    label: 'Врачи',
+    value: '0',
     trend: '+5%',
     trendColor: 'text-green-500',
     trendIcon: TrendingUpIcon,
-    icon: ActivityIcon,
+    icon: StethoscopeIcon,
     bgColor: 'bg-green-100 dark:bg-green-900',
     iconColor: 'text-green-500 dark:text-green-300',
-  },
-]);
-
-// Последние активности
-const recentActivities = ref([
-  {
-    title: 'Завершена тренировка',
-    description: 'Кардио тренировка - 30 минут',
-    time: '10 мин назад',
-    icon: CheckCircleIcon,
-    bgColor: 'bg-green-100 dark:bg-green-900',
-    iconColor: 'text-green-500 dark:text-green-300',
-  },
-  {
-    title: 'Новое уведомление',
-    description: 'Напоминание о приеме витаминов',
-    time: '1 час назад',
-    icon: AlertCircleIcon,
-    bgColor: 'bg-yellow-100 dark:bg-yellow-900',
-    iconColor: 'text-yellow-500 dark:text-yellow-300',
-  },
-  {
-    title: 'Запланирована встреча',
-    description: 'Консультация с врачом',
-    time: '2 часа назад',
-    icon: CalendarIcon,
-    bgColor: 'bg-blue-100 dark:bg-blue-900',
-    iconColor: 'text-blue-500 dark:text-blue-300',
-  },
-  {
-    title: 'Обновлен профиль',
-    description: 'Изменены данные о здоровье',
-    time: '5 часов назад',
-    icon: ClockIcon,
-    bgColor: 'bg-purple-100 dark:bg-purple-900',
-    iconColor: 'text-purple-500 dark:text-purple-300',
   },
 ]);
 
@@ -377,6 +394,36 @@ const calculateCalories = () => {
   }
 };
 
+const calculateBMI = () => {
+  if (weight.value && height.value) {
+    const heightInMeters = height.value / 100;
+    const bmiValue = weight.value / (heightInMeters * heightInMeters);
+    bmi.value = bmiValue.toFixed(1);
+
+    // Определение категории ИМТ
+    if (bmiValue < 18.5) {
+      bmiCategory.value = 'Недостаточный вес';
+      bmiColor.value = 'bg-blue-500';
+      bmiProgress.value = 25;
+    } else if (bmiValue < 25) {
+      bmiCategory.value = 'Нормальный вес';
+      bmiColor.value = 'bg-green-500';
+      bmiProgress.value = 50;
+    } else if (bmiValue < 30) {
+      bmiCategory.value = 'Избыточный вес';
+      bmiColor.value = 'bg-yellow-500';
+      bmiProgress.value = 75;
+    } else {
+      bmiCategory.value = 'Ожирение';
+      bmiColor.value = 'bg-red-500';
+      bmiProgress.value = 100;
+    }
+  } else {
+    bmi.value = null;
+    bmiCategory.value = '';
+  }
+};
+
 const fetchTokenPayload = async () => {
   try {
     const token = getToken();
@@ -396,8 +443,53 @@ const fetchTokenPayload = async () => {
   } catch {}
 };
 
-onMounted(() => {
-  fetchTokenPayload();
+const fetchStats = async () => {
+  try {
+    const token = getToken();
+    if (!token) return;
+
+    // Получаем количество пользователей
+    const usersRes = await fetch(`${API_URL}/patient`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (usersRes.ok) {
+      const users = await usersRes.json();
+      stats.value[0].value = users.length.toString();
+    }
+
+    // Получаем количество заявок
+    const requestsRes = await fetch(`${API_URL}/request`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (requestsRes.ok) {
+      const requests = await requestsRes.json();
+      stats.value[1].value = requests.length.toString();
+    }
+
+    // Получаем количество технологических карт
+    const processMapsRes = await fetch(`${API_URL}/process-map`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (processMapsRes.ok) {
+      const processMaps = await processMapsRes.json();
+      stats.value[2].value = processMaps.length.toString();
+    }
+
+    // Получаем количество врачей
+    const doctorsRes = await fetch(`${API_URL}/doctor`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (doctorsRes.ok) {
+      const doctors = await doctorsRes.json();
+      stats.value[3].value = doctors.length.toString();
+    }
+  } catch (e) {
+    console.error('Ошибка загрузки статистики:', e);
+  }
+};
+
+onMounted(async () => {
+  await Promise.all([fetchTokenPayload(), fetchStats()]);
 });
 </script>
 

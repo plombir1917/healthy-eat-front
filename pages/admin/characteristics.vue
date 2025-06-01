@@ -105,14 +105,30 @@
             required
             :error="errors.preference"
           />
-          <AnimatedInput
-            v-model.number="form.patient_id"
-            label="ID Пациента"
-            type="number"
-            id="patient_id"
-            required
-            :error="errors.patient_id"
-          />
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Пациент
+            </label>
+            <select
+              v-model="form.patient_id"
+              required
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Выберите пациента</option>
+              <option
+                v-for="patient in patients"
+                :key="patient.id"
+                :value="patient.id"
+              >
+                {{ patient.name }} {{ patient.surname }}
+              </option>
+            </select>
+            <span v-if="errors.patient_id" class="text-red-500 text-sm mt-1">{{
+              errors.patient_id
+            }}</span>
+          </div>
 
           <AnimatedButton
             type="submit"
@@ -160,14 +176,30 @@
             required
             :error="errors.preference"
           />
-          <AnimatedInput
-            v-model.number="editForm.patient_id"
-            label="ID Пациента"
-            type="number"
-            id="edit-patient_id"
-            required
-            :error="errors.patient_id"
-          />
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Пациент
+            </label>
+            <select
+              v-model="editForm.patient_id"
+              required
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Выберите пациента</option>
+              <option
+                v-for="patient in patients"
+                :key="patient.id"
+                :value="patient.id"
+              >
+                {{ patient.name }} {{ patient.surname }}
+              </option>
+            </select>
+            <span v-if="errors.patient_id" class="text-red-500 text-sm mt-1">{{
+              errors.patient_id
+            }}</span>
+          </div>
 
           <div class="flex gap-2">
             <AnimatedButton type="submit" variant="primary" class="w-full">
@@ -197,11 +229,13 @@ import { toast } from 'vue3-toastify';
 import { useAuth } from '~/composables/useAuth';
 
 const API_URL = 'https://igor-plaxin.ru/healthy-eat/characteristic';
+const PATIENTS_URL = 'https://igor-plaxin.ru/healthy-eat/patient';
 const TOKEN_PAYLOAD_URL =
   'https://igor-plaxin.ru/healthy-eat/auth/token-payload';
 const { getToken } = useAuth();
 
 const characteristics = ref([]);
+const patients = ref([]);
 const isLoading = ref(true);
 const modalLoading = ref(false);
 const showCreateModal = ref(false);
@@ -243,6 +277,23 @@ const fetchTokenPayload = async () => {
     userRole.value = data.role;
   } catch (e) {
     toast.error(e.message || 'Ошибка получения данных токена');
+  }
+};
+
+const fetchPatients = async () => {
+  try {
+    const token = getToken();
+    if (!token) throw new Error('Токен авторизации не найден');
+
+    const res = await fetch(PATIENTS_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw new Error('Ошибка загрузки пациентов');
+    patients.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки пациентов');
   }
 };
 
@@ -454,7 +505,7 @@ const closeEditModal = () => {
 
 onMounted(async () => {
   await fetchTokenPayload();
-  fetchCharacteristics(); // Fetch characteristics regardless of role, but actions are restricted
+  await Promise.all([fetchCharacteristics(), fetchPatients()]);
 });
 </script>
 

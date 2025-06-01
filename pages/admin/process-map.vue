@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-2 sm:px-4">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-primary dark:text-white">
-          Дорожные карты
+          Технологические карты
         </h1>
         <AnimatedButton
           v-if="userRole === 'ADMIN' || userRole === 'DOCTOR'"
