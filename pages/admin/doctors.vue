@@ -10,7 +10,12 @@
         placeholder="🔍 Поиск по имени"
         class="w-full p-2 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white text-sm sm:text-base"
       />
-      <AnimatedButton @click="openCreateModal" variant="primary" class="ml-4">
+      <AnimatedButton
+        v-if="userRole === 'ADMIN'"
+        @click="openCreateModal"
+        variant="primary"
+        class="ml-4"
+      >
         + Добавить врача
       </AnimatedButton>
     </div>
@@ -420,6 +425,10 @@ const createDoctor = async () => {
 };
 
 const openCreateModal = () => {
+  if (userRole.value === 'PATIENT' || userRole.value === 'DOCTOR') {
+    toast.error('У вас нет прав для добавления врачей');
+    return;
+  }
   showCreateModal.value = true;
   form.value = {
     name: '',

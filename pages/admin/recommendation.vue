@@ -93,13 +93,15 @@
     <div
       v-if="showCreateModal"
       class="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 animate-fade-in overflow-y-auto"
+      @click.self="closeCreateModal"
     >
       <div
         class="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-scale-in my-4 mx-4"
       >
         <button
+          type="button"
           class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl transition-colors"
-          @click="closeCreateModal"
+          @click.stop="closeCreateModal"
         >
           &times;
         </button>
@@ -148,8 +150,9 @@
         class="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-scale-in my-4 mx-4"
       >
         <button
+          type="button"
           class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl transition-colors"
-          @click="closeEditModal"
+          @click="() => (showEditModal = false)"
         >
           &times;
         </button>
@@ -185,7 +188,7 @@
               type="button"
               variant="secondary"
               class="w-full"
-              @click="closeEditModal"
+              @click="() => (showEditModal = false)"
             >
               Отмена
             </AnimatedButton>
@@ -238,6 +241,27 @@ const filteredRecommendations = computed(() => {
     return dietName.toLowerCase().includes(search.value.toLowerCase());
   });
 });
+
+const closeCreateModal = () => {
+  showCreateModal.value = false;
+  form.value = {
+    diet_id: '',
+  };
+  errors.value = {
+    diet_id: '',
+  };
+};
+
+const closeEditModal = () => {
+  showEditModal.value = false;
+  selectedRecommendation.value = null;
+  editForm.value = {
+    diet_id: '',
+  };
+  errors.value = {
+    diet_id: '',
+  };
+};
 
 const fetchTokenPayload = async () => {
   try {
@@ -344,22 +368,30 @@ const openCreateModal = () => {
   };
 };
 
-const closeCreateModal = () => {
-  showCreateModal.value = false;
-};
-
 const openEditModal = (recommendation) => {
-  selectedRecommendation.value = recommendation;
-  editForm.value = {
-    diet_id: recommendation.diet_id,
-  };
-  showEditModal.value = true;
+  try {
+    selectedRecommendation.value = recommendation;
+    editForm.value = {
+      diet_id: recommendation.diet_id,
+    };
+    errors.value = {
+      diet_id: '',
+    };
+    showEditModal.value = true;
+  } catch (e) {
+    toast.error('Ошибка при открытии формы редактирования');
+    console.error(e);
+  }
 };
 
 const saveEditRecommendation = async () => {
   if (!validateForm(editForm.value)) return;
-  if (!selectedRecommendation.value) return;
+  if (!selectedRecommendation.value) {
+    toast.error('Не выбрана рекомендация для редактирования');
+    return;
+  }
 
+  modalLoading.value = true;
   try {
     const token = getToken();
     if (!token) throw new Error('Токен авторизации не найден');
@@ -378,12 +410,18 @@ const saveEditRecommendation = async () => {
       body: JSON.stringify(payload),
     });
 
-    if (!res.ok) throw new Error('Ошибка при обновлении данных');
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Ошибка при обновлении данных');
+    }
+
     toast.success('Данные рекомендации обновлены');
     closeEditModal();
-    fetchRecommendations(); // Обновить список рекомендаций после редактирования
+    await fetchRecommendations(); // Обновить список рекомендаций после редактирования
   } catch (e) {
     toast.error(e.message || 'Ошибка при обновлении данных');
+  } finally {
+    modalLoading.value = false;
   }
 };
 
