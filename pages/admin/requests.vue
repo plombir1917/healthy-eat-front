@@ -643,7 +643,7 @@ const updateRequest = async () => {
     }
 
     const res = await fetch(`${API_URL}/${selectedRequest.value.id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
