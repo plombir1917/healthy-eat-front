@@ -3,7 +3,11 @@
     <div class="max-w-7xl mx-auto px-4 mb-6">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-primary dark:text-white">Заявки</h1>
-        <AnimatedButton @click="openCreateModal" variant="primary">
+        <AnimatedButton
+          v-if="userRole === 'ADMIN' || userRole === 'PATIENT'"
+          @click="openCreateModal"
+          variant="primary"
+        >
           + Создать заявку
         </AnimatedButton>
       </div>
@@ -81,6 +85,11 @@
               <th
                 class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
               >
+                Описание
+              </th>
+              <th
+                class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+              >
                 Статус
               </th>
               <th
@@ -113,6 +122,9 @@
               </td>
               <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
                 {{ request.recommendation_id }}
+              </td>
+              <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                {{ request.description || '-' }}
               </td>
               <td class="py-3 px-4">
                 <span
@@ -192,11 +204,10 @@
             <label
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
-              Врач
+              Врач (необязательно)
             </label>
             <select
               v-model="form.doctor_id"
-              required
               class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
             >
               <option value="">Выберите врача</option>
@@ -352,6 +363,14 @@
               <option value="REJECTED">Отклонено</option>
             </select>
           </div>
+          <AnimatedInput
+            v-model="form.description"
+            label="Описание"
+            type="text"
+            id="edit-description"
+            required
+            :error="errors.description"
+          />
           <div class="flex gap-2">
             <button
               type="submit"
@@ -549,11 +568,14 @@ const createRequest = async () => {
     if (!token) throw new Error('Токен авторизации не найден');
 
     const payload = {
-      doctor_id: parseInt(form.value.doctor_id),
       patient_id: parseInt(form.value.patient_id),
       status: 'SEND',
       description: form.value.description,
     };
+
+    if (form.value.doctor_id) {
+      payload.doctor_id = parseInt(form.value.doctor_id);
+    }
 
     if (form.value.recommendation_id && userRole.value !== 'PATIENT') {
       payload.recommendation_id = parseInt(form.value.recommendation_id);

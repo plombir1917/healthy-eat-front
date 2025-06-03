@@ -59,6 +59,11 @@
               <th
                 class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
               >
+                Описание
+              </th>
+              <th
+                class="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium"
+              >
                 Действия
               </th>
             </tr>
@@ -80,6 +85,9 @@
               </td>
               <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
                 {{ getDoctorName(recommendation.doctor_id) }}
+              </td>
+              <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
+                {{ recommendation.description || '-' }}
               </td>
               <td class="py-3 px-4 text-gray-900 dark:text-gray-100">
                 <div class="flex gap-2">
@@ -125,7 +133,7 @@
           Добавить рекомендацию
         </h2>
         <form @submit.prevent="createRecommendation" class="space-y-4">
-          <div>
+          <div v-if="userRole !== 'DOCTOR'">
             <label
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
@@ -174,6 +182,12 @@
             <span v-if="errors.request_id" class="text-red-500 text-sm mt-1">{{
               errors.request_id
             }}</span>
+            <p
+              v-if="getPendingRequests.length === 0"
+              class="text-yellow-500 text-sm mt-1"
+            >
+              Нет доступных заявок для создания рекомендации
+            </p>
           </div>
 
           <div v-if="selectedRequest">
@@ -260,6 +274,14 @@
               errors.diet_id
             }}</span>
           </div>
+          <AnimatedInput
+            v-model="form.description"
+            label="Описание"
+            type="text"
+            id="description"
+            required
+            :error="errors.description"
+          />
           <AnimatedButton
             type="submit"
             variant="primary"
@@ -311,6 +333,14 @@
               errors.diet_id
             }}</span>
           </div>
+          <AnimatedInput
+            v-model="editForm.description"
+            label="Описание"
+            type="text"
+            id="edit-description"
+            required
+            :error="errors.description"
+          />
           <div class="flex gap-2">
             <AnimatedButton type="submit" variant="primary" class="w-full">
               Сохранить
@@ -379,17 +409,20 @@ const form = ref({
   diet_id: '',
   doctor_id: '',
   request_id: '',
+  description: '',
 });
 
 const editForm = ref({
   diet_id: '',
   doctor_id: '',
+  description: '',
 });
 
 const errors = ref({
   diet_id: '',
   doctor_id: '',
   request_id: '',
+  description: '',
 });
 
 const filteredRecommendations = computed(() => {
@@ -405,11 +438,13 @@ const closeCreateModal = () => {
     diet_id: '',
     doctor_id: '',
     request_id: '',
+    description: '',
   };
   errors.value = {
     diet_id: '',
     doctor_id: '',
     request_id: '',
+    description: '',
   };
   selectedPatientInfo.value = null;
   selectedRequest.value = null;
@@ -421,10 +456,12 @@ const closeEditModal = () => {
   editForm.value = {
     diet_id: '',
     doctor_id: '',
+    description: '',
   };
   errors.value = {
     diet_id: '',
     doctor_id: '',
+    description: '',
   };
 };
 
@@ -442,6 +479,7 @@ const fetchTokenPayload = async () => {
     if (!res.ok) throw new Error('Ошибка получения данных токена');
     const data = await res.json();
     userRole.value = data.role;
+    adminId.value = data.id;
   } catch (e) {
     toast.error(e.message || 'Ошибка получения данных токена');
   }
@@ -638,6 +676,7 @@ const validateForm = (formData) => {
     diet_id: '',
     doctor_id: '',
     request_id: '',
+    description: '',
   };
 
   if (!formData.diet_id) {
@@ -655,6 +694,11 @@ const validateForm = (formData) => {
     valid = false;
   }
 
+  if (!formData.description) {
+    errors.value.description = 'Описание обязательно';
+    valid = false;
+  }
+
   return valid;
 };
 
@@ -666,9 +710,22 @@ const createRecommendation = async () => {
     const token = getToken();
     if (!token) throw new Error('Токен авторизации не найден');
 
+    // Получаем выбранную заявку
+    const selectedRequest = requests.value.find(
+      (r) => r.id === parseInt(form.value.request_id)
+    );
+    if (!selectedRequest) throw new Error('Заявка не найдена');
+
+    // Если врач не указан в заявке и текущий пользователь - врач
+    if (!selectedRequest.doctor_id && userRole.value === 'DOCTOR') {
+      await fetchTokenPayload(); // Обновляем adminId
+    }
+
     const payload = {
       diet_id: parseInt(form.value.diet_id),
-      doctor_id: parseInt(form.value.doctor_id),
+      doctor_id: selectedRequest.doctor_id || adminId.value,
+      request_id: parseInt(form.value.request_id),
+      description: form.value.description,
     };
 
     const res = await fetch(API_URL, {
@@ -684,7 +741,7 @@ const createRecommendation = async () => {
 
     const newRecommendation = await res.json();
 
-    // Обновляем заявку, связывая её с новой рекомендацией
+    // Обновляем заявку, связывая её с новой рекомендацией и добавляем врача, если его не было
     const updateRequestRes = await fetch(
       `${REQUESTS_URL}/${form.value.request_id}`,
       {
@@ -696,6 +753,7 @@ const createRecommendation = async () => {
         body: JSON.stringify({
           recommendation_id: newRecommendation.id,
           status: 'APPROVED',
+          doctor_id: selectedRequest.doctor_id || adminId.value, // Добавляем врача, если его не было
         }),
       }
     );
@@ -716,13 +774,15 @@ const openCreateModal = () => {
   showCreateModal.value = true;
   form.value = {
     diet_id: '',
-    doctor_id: '',
+    doctor_id: userRole.value === 'DOCTOR' ? adminId.value : '',
     request_id: '',
+    description: '',
   };
   errors.value = {
     diet_id: '',
     doctor_id: '',
     request_id: '',
+    description: '',
   };
   selectedPatientInfo.value = null;
   selectedRequest.value = null;
@@ -733,9 +793,11 @@ const openEditModal = (recommendation) => {
     selectedRecommendation.value = recommendation;
     editForm.value = {
       diet_id: recommendation.diet_id,
+      description: recommendation.description || '',
     };
     errors.value = {
       diet_id: '',
+      description: '',
     };
     showEditModal.value = true;
   } catch (e) {
@@ -759,6 +821,7 @@ const saveEditRecommendation = async () => {
     const payload = {
       ...editForm.value,
       diet_id: parseInt(editForm.value.diet_id),
+      description: editForm.value.description,
     };
 
     const res = await fetch(`${API_URL}/${selectedRecommendation.value.id}`, {
@@ -844,11 +907,19 @@ const handlePatientChange = (patientId) => {
   selectedPatientInfo.value = getPatientInfo(patientId);
 };
 
-const handleRequestChange = (requestId) => {
+const handleRequestChange = async (requestId) => {
   const request = requests.value.find((r) => r.id === parseInt(requestId));
   if (request) {
     selectedRequest.value = request;
-    form.value.doctor_id = request.doctor_id.toString();
+
+    // Если врач не указан в заявке и текущий пользователь - врач
+    if (!request.doctor_id && userRole.value === 'DOCTOR') {
+      await fetchTokenPayload(); // Обновляем adminId
+      form.value.doctor_id = adminId.value;
+    } else {
+      form.value.doctor_id = request.doctor_id?.toString() || '';
+    }
+
     handlePatientChange(request.patient_id.toString());
   }
 };

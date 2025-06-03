@@ -9,6 +9,7 @@
           <div>
             <h1 class="text-2xl font-bold text-primary dark:text-white mb-1">
               Добро пожаловать, {{ userName }}!
+              {{ userRole === 'DOCTOR' ? '👨‍⚕️' : '' }}
             </h1>
             <p class="text-secondary dark:text-gray-300">
               Вот ваш обзор на сегодня
@@ -299,6 +300,7 @@ const { isAuthenticated, getToken } = useAuth();
 const adminName = ref('');
 const adminSurname = ref('');
 const userName = ref('Пользователь');
+const userRole = ref(null);
 
 // Данные для калькулятора
 const weight = ref(null);
@@ -400,7 +402,7 @@ const calculateBMI = () => {
     const bmiValue = weight.value / (heightInMeters * heightInMeters);
     bmi.value = bmiValue.toFixed(1);
 
-    // Определение категории ИМТ
+    // Определение категории ИМТ с учетом степеней ожирения
     if (bmiValue < 18.5) {
       bmiCategory.value = 'Недостаточный вес';
       bmiColor.value = 'bg-blue-500';
@@ -413,9 +415,17 @@ const calculateBMI = () => {
       bmiCategory.value = 'Избыточный вес';
       bmiColor.value = 'bg-yellow-500';
       bmiProgress.value = 75;
-    } else {
-      bmiCategory.value = 'Ожирение';
+    } else if (bmiValue < 35) {
+      bmiCategory.value = 'Ожирение I степени';
+      bmiColor.value = 'bg-orange-500';
+      bmiProgress.value = 85;
+    } else if (bmiValue < 40) {
+      bmiCategory.value = 'Ожирение II степени';
       bmiColor.value = 'bg-red-500';
+      bmiProgress.value = 90;
+    } else {
+      bmiCategory.value = 'Ожирение III степени';
+      bmiColor.value = 'bg-red-700';
       bmiProgress.value = 100;
     }
   } else {
@@ -438,6 +448,7 @@ const fetchTokenPayload = async () => {
     const data = await res.json();
     adminName.value = data.name || '';
     adminSurname.value = data.surname || '';
+    userRole.value = data.role;
     userName.value =
       `${adminName.value} ${adminSurname.value}`.trim() || 'Пользователь';
   } catch {}
