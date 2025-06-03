@@ -80,6 +80,34 @@
               <strong>Заболевание:</strong>
               {{ getIllnessName(selectedDiet.illness_id) }}
             </p>
+            <!-- Добавляем секцию для связанных технологических карт -->
+            <div
+              class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+            >
+              <h3
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
+              >
+                Связанные технологические карты:
+              </h3>
+              <ul
+                v-if="relatedProcessMaps.length > 0"
+                class="list-disc list-inside ml-4"
+              >
+                <li
+                  v-for="pm in relatedProcessMaps"
+                  :key="pm.id"
+                  class="text-secondary dark:text-gray-300 text-sm sm:text-base"
+                >
+                  {{ pm.dish_name }}
+                </li>
+              </ul>
+              <p
+                v-else
+                class="text-secondary dark:text-gray-400 text-sm italic"
+              >
+                Нет связанных технологических карт.
+              </p>
+            </div>
             <div
               v-if="userRole === 'ADMIN' || userRole === 'DOCTOR'"
               class="flex gap-2 mt-4"
@@ -234,6 +262,7 @@ const { getToken } = useAuth();
 
 const diets = ref([]);
 const illnesses = ref([]);
+const processMaps = ref([]);
 const isLoading = ref(true);
 const modalLoading = ref(false);
 const search = ref('');
@@ -261,6 +290,11 @@ const filteredDiets = computed(() => {
   return diets.value.filter((d) =>
     d.name.toLowerCase().includes(search.value.toLowerCase())
   );
+});
+
+const relatedProcessMaps = computed(() => {
+  if (!selectedDiet.value) return [];
+  return processMaps.value.filter((pm) => pm.diet_id === selectedDiet.value.id);
 });
 
 const fetchTokenPayload = async () => {
@@ -309,6 +343,16 @@ const fetchIllnesses = async () => {
     illnesses.value = await res.json();
   } catch (e) {
     toast.error(e.message || 'Ошибка загрузки заболеваний');
+  }
+};
+
+const fetchProcessMaps = async () => {
+  try {
+    const res = await fetch('https://igor-plaxin.ru/healthy-eat/process-map');
+    if (!res.ok) throw new Error('Ошибка загрузки технологических карт');
+    processMaps.value = await res.json();
+  } catch (e) {
+    toast.error(e.message || 'Ошибка загрузки технологических карт');
   }
 };
 
@@ -461,6 +505,6 @@ const closeModal = () => {
 
 onMounted(async () => {
   await fetchTokenPayload();
-  await Promise.all([fetchDiets(), fetchIllnesses()]);
+  await Promise.all([fetchDiets(), fetchIllnesses(), fetchProcessMaps()]);
 });
 </script>

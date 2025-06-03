@@ -247,13 +247,12 @@
           <h2
             class="text-2xl sm:text-3xl md:text-4xl font-bold text-primary dark:text-white mb-2 sm:mb-4"
           >
-            Технологические карты
+            Рекомендованные диеты и блюда
           </h2>
           <p
             class="text-base sm:text-xl text-secondary dark:text-gray-300 max-w-3xl mx-auto"
           >
-            Пошаговые инструкции по приготовлению блюд для различных заболеваний
-            ЖКТ
+            Ознакомьтесь с диетами и соответствующими технологическими картами
           </p>
         </div>
 
@@ -262,7 +261,7 @@
           <input
             v-model="search"
             type="text"
-            placeholder="🔍 Поиск по названию блюда"
+            placeholder="🔍 Поиск по названию диеты"
             class="w-full p-2 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white text-sm sm:text-base"
           />
         </div>
@@ -271,37 +270,42 @@
           <LoadingSpinner />
         </div>
 
-        <!-- Список технологических карт -->
+        <!-- Список диет (раскрывающиеся элементы) -->
         <div v-else class="space-y-4">
           <div
-            v-if="filteredProcessMaps.length === 0"
+            v-if="filteredDiets.length === 0"
             class="text-center text-gray-600 dark:text-gray-400 py-10"
           >
-            Технологические карты пока не добавлены
+            Диеты пока не добавлены
           </div>
           <div
             v-else
-            v-for="item in filteredProcessMaps"
-            :key="item.id"
+            v-for="diet in filteredDiets"
+            :key="diet.id"
             class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300"
             :class="{
               'ring-2 ring-primary':
-                selectedItem && selectedItem.id === item.id,
+                selectedItem && selectedItem.id === diet.id,
             }"
           >
             <button
               class="w-full text-left p-4 sm:p-6 focus:outline-none flex justify-between items-center"
-              @click="toggleItem(item)"
+              @click="toggleItem(diet)"
             >
-              <h2
-                class="text-lg sm:text-xl font-semibold text-primary dark:text-white"
-              >
-                {{ item.dish_name }}
-              </h2>
+              <div>
+                <h2
+                  class="text-lg sm:text-xl font-semibold text-primary dark:text-white"
+                >
+                  {{ diet.name }}
+                </h2>
+                <p class="text-secondary dark:text-gray-300 text-sm mt-1">
+                  Заболевание: {{ getIllnessName(diet.illness_id) }}
+                </p>
+              </div>
               <svg
                 :class="[
                   'w-5 h-5 text-gray-500 transition-transform duration-300',
-                  { 'rotate-180': selectedItem && selectedItem.id === item.id },
+                  { 'rotate-180': selectedItem && selectedItem.id === diet.id },
                 ]"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -317,32 +321,52 @@
               </svg>
             </button>
             <div
-              v-if="selectedItem && selectedItem.id === item.id"
+              v-if="selectedItem && selectedItem.id === diet.id"
               class="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700"
             >
-              <div
-                class="text-secondary dark:text-gray-300 text-sm sm:text-base space-y-3"
+              <h3
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
               >
-                <p><strong>Ингредиенты:</strong> {{ item.ingredients }}</p>
-                <p>
-                  <strong>Процесс приготовления:</strong>
-                  {{ item.cooking_process }}
-                </p>
-                <div>
-                  <h3 class="font-semibold text-primary dark:text-white mb-1">
-                    Пищевая ценность:
-                  </h3>
-                  <ul class="list-disc list-inside ml-4">
-                    <li>Белки: {{ item.proteins }}г</li>
-                    <li>Жиры: {{ item.fats }}г</li>
-                    <li>Углеводы: {{ item.carbohydrates }}г</li>
-                    <li>Калории: {{ item.calories }}ккал</li>
-                  </ul>
+                Технологические карты для диеты "{{ selectedItem.name }}":
+              </h3>
+              <div
+                v-if="relatedProcessMaps.length === 0"
+                class="text-center text-gray-600 dark:text-gray-400 italic"
+              >
+                Технологические карты для этой диеты пока не добавлены.
+              </div>
+              <div v-else class="space-y-4">
+                <div
+                  v-for="pm in relatedProcessMaps"
+                  :key="pm.id"
+                  class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm"
+                >
+                  <h4 class="font-semibold text-primary dark:text-white mb-2">
+                    {{ pm.dish_name }}
+                  </h4>
+                  <p class="text-secondary dark:text-gray-300 text-sm mb-1">
+                    <strong>Ингредиенты:</strong> {{ pm.ingredients }}
+                  </p>
+                  <p class="text-secondary dark:text-gray-300 text-sm mb-1">
+                    <strong>Процесс приготовления:</strong>
+                    {{ pm.cooking_process }}
+                  </p>
+                  <div>
+                    <h5
+                      class="font-semibold text-primary dark:text-white text-sm mb-1"
+                    >
+                      Пищевая ценность:
+                    </h5>
+                    <ul
+                      class="list-disc list-inside ml-4 text-secondary dark:text-gray-300 text-sm"
+                    >
+                      <li>Белки: {{ pm.proteins }}г</li>
+                      <li>Жиры: {{ pm.fats }}г</li>
+                      <li>Углеводы: {{ pm.carbohydrates }}г</li>
+                      <li>Калории: {{ pm.calories }}ккал</li>
+                    </ul>
+                  </div>
                 </div>
-                <p>
-                  <strong>Связанная диета:</strong>
-                  {{ getDietName(item.diet_id) }}
-                </p>
               </div>
             </div>
           </div>
@@ -724,11 +748,24 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
 const API_URL = 'https://igor-plaxin.ru/healthy-eat/process-map';
 const DIET_URL = 'https://igor-plaxin.ru/healthy-eat/diet';
+const ILLNESS_URL = 'https://igor-plaxin.ru/healthy-eat/illness';
 const processMaps = ref([]);
 const diets = ref([]);
+const illnesses = ref([]);
 const isLoading = ref(true);
 const search = ref('');
 const selectedItem = ref(null);
+
+const filteredDiets = computed(() => {
+  return diets.value.filter((diet) =>
+    diet.name.toLowerCase().includes(search.value.toLowerCase())
+  );
+});
+
+const relatedProcessMaps = computed(() => {
+  if (!selectedItem.value) return [];
+  return processMaps.value.filter((pm) => pm.diet_id === selectedItem.value.id);
+});
 
 const filteredProcessMaps = computed(() => {
   return processMaps.value.filter((item) =>
@@ -743,8 +780,6 @@ const fetchProcessMaps = async () => {
     processMaps.value = await res.json();
   } catch (e) {
     console.error(e.message || 'Ошибка загрузки технологических карт');
-  } finally {
-    isLoading.value = false;
   }
 };
 
@@ -755,13 +790,25 @@ const fetchDiets = async () => {
     diets.value = await res.json();
   } catch (e) {
     console.error(e.message || 'Ошибка загрузки диет');
+  } finally {
+    isLoading.value = false;
   }
 };
 
-const getDietName = (dietId) => {
-  if (!dietId) return 'Не привязана';
-  const diet = diets.value.find((d) => d.id === dietId);
-  return diet ? diet.name : 'Неизвестная диета';
+const fetchIllnesses = async () => {
+  try {
+    const res = await fetch(ILLNESS_URL);
+    if (!res.ok) throw new Error('Ошибка загрузки заболеваний');
+    illnesses.value = await res.json();
+  } catch (e) {
+    console.error(e.message || 'Ошибка загрузки заболеваний');
+  }
+};
+
+const getIllnessName = (illnessId) => {
+  if (!illnessId) return 'Неизвестное заболевание';
+  const illness = illnesses.value.find((i) => i.id === illnessId);
+  return illness ? illness.name : 'Неизвестное заболевание';
 };
 
 const toggleItem = (item) => {
@@ -773,7 +820,7 @@ const toggleItem = (item) => {
 };
 
 onMounted(async () => {
-  await Promise.all([fetchProcessMaps(), fetchDiets()]);
+  await Promise.all([fetchProcessMaps(), fetchDiets(), fetchIllnesses()]);
 });
 
 definePageMeta({
