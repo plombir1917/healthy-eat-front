@@ -317,7 +317,7 @@ const bmiColor = ref('');
 const bmiProgress = ref(0);
 
 // Статистика
-const API_URL = 'https://igor-plaxin.ru/healthy-eat';
+const API_URL = 'https://igor-plaxin.store/healthy-eat';
 const stats = ref([
   {
     label: 'Активные пользователи',
@@ -439,7 +439,7 @@ const fetchTokenPayload = async () => {
     const token = getToken();
     if (!token) return;
     const res = await fetch(
-      'https://igor-plaxin.ru/healthy-eat/auth/token-payload',
+      'https://igor-plaxin.store/healthy-eat/auth/token-payload',
       {
         headers: { Authorization: `Bearer ${token}` },
       }

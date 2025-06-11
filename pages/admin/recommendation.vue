@@ -368,20 +368,21 @@ import AnimatedButton from '@/components/AnimatedButton.vue';
 import AnimatedInput from '@/components/AnimatedInput.vue';
 import { useAuth } from '~/composables/useAuth';
 
-const API_URL = 'https://igor-plaxin.ru/healthy-eat/recommendation';
-const DIET_URL = 'https://igor-plaxin.ru/healthy-eat/diet';
-const PATIENTS_URL = 'https://igor-plaxin.ru/healthy-eat/patient';
-const DOCTORS_URL = 'https://igor-plaxin.ru/healthy-eat/doctor';
-const REQUESTS_URL = 'https://igor-plaxin.ru/healthy-eat/request';
-const ILLNESSES_URL = 'https://igor-plaxin.ru/healthy-eat/illness';
-const SYMPTOMS_URL = 'https://igor-plaxin.ru/healthy-eat/symptome';
-const CHARACTERISTICS_URL = 'https://igor-plaxin.ru/healthy-eat/characteristic';
+const API_URL = 'https://igor-plaxin.store/healthy-eat/recommendation';
+const DIET_URL = 'https://igor-plaxin.store/healthy-eat/diet';
+const PATIENTS_URL = 'https://igor-plaxin.store/healthy-eat/patient';
+const DOCTORS_URL = 'https://igor-plaxin.store/healthy-eat/doctor';
+const REQUESTS_URL = 'https://igor-plaxin.store/healthy-eat/request';
+const ILLNESSES_URL = 'https://igor-plaxin.store/healthy-eat/illness';
+const SYMPTOMS_URL = 'https://igor-plaxin.store/healthy-eat/symptome';
+const CHARACTERISTICS_URL =
+  'https://igor-plaxin.store/healthy-eat/characteristic';
 const ILLNESS_ON_PATIENT_URL =
-  'https://igor-plaxin.ru/healthy-eat/illness-on-patient';
+  'https://igor-plaxin.store/healthy-eat/illness-on-patient';
 const ILLNESS_ON_SYMPTOME_URL =
-  'https://igor-plaxin.ru/healthy-eat/illness-on-symptome';
+  'https://igor-plaxin.store/healthy-eat/illness-on-symptome';
 const TOKEN_PAYLOAD_URL =
-  'https://igor-plaxin.ru/healthy-eat/auth/token-payload';
+  'https://igor-plaxin.store/healthy-eat/auth/token-payload';
 const { getToken } = useAuth();
 
 const recommendations = ref([]);

@@ -326,10 +326,10 @@ import AnimatedButton from '@/components/AnimatedButton.vue';
 import AnimatedInput from '@/components/AnimatedInput.vue';
 import { useAuth } from '~/composables/useAuth';
 
-const API_URL = 'https://igor-plaxin.ru/healthy-eat/process-map';
-const DIET_URL = 'https://igor-plaxin.ru/healthy-eat/diet';
+const API_URL = 'https://igor-plaxin.store/healthy-eat/process-map';
+const DIET_URL = 'https://igor-plaxin.store/healthy-eat/diet';
 const TOKEN_PAYLOAD_URL =
-  'https://igor-plaxin.ru/healthy-eat/auth/token-payload';
+  'https://igor-plaxin.store/healthy-eat/auth/token-payload';
 const { getToken } = useAuth();
 
 const processMaps = ref([]);

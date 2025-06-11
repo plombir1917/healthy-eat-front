@@ -189,7 +189,7 @@ const handleRegister = async () => {
   try {
     const { confirmPassword, ...registerData } = form.value;
     const response = await fetch(
-      'https://igor-plaxin.ru/healthy-eat/auth/register',
+      'https://igor-plaxin.store/healthy-eat/auth/register',
       {
         method: 'POST',
         headers: {

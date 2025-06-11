@@ -147,7 +147,7 @@ const handleLogin = async () => {
   isLoading.value = true;
   try {
     const response = await fetch(
-      'https://igor-plaxin.ru/healthy-eat/auth/login',
+      'https://igor-plaxin.store/healthy-eat/auth/login',
       {
         method: 'POST',
         headers: {

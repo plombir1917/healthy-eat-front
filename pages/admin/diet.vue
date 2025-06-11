@@ -254,10 +254,10 @@ import AnimatedButton from '@/components/AnimatedButton.vue';
 import AnimatedInput from '@/components/AnimatedInput.vue';
 import { useAuth } from '~/composables/useAuth';
 
-const API_URL = 'https://igor-plaxin.ru/healthy-eat/diet';
-const ILLNESS_URL = 'https://igor-plaxin.ru/healthy-eat/illness';
+const API_URL = 'https://igor-plaxin.store/healthy-eat/diet';
+const ILLNESS_URL = 'https://igor-plaxin.store/healthy-eat/illness';
 const TOKEN_PAYLOAD_URL =
-  'https://igor-plaxin.ru/healthy-eat/auth/token-payload';
+  'https://igor-plaxin.store/healthy-eat/auth/token-payload';
 const { getToken } = useAuth();
 
 const diets = ref([]);
@@ -348,7 +348,9 @@ const fetchIllnesses = async () => {
 
 const fetchProcessMaps = async () => {
   try {
-    const res = await fetch('https://igor-plaxin.ru/healthy-eat/process-map');
+    const res = await fetch(
+      'https://igor-plaxin.store/healthy-eat/process-map'
+    );
     if (!res.ok) throw new Error('Ошибка загрузки технологических карт');
     processMaps.value = await res.json();
   } catch (e) {

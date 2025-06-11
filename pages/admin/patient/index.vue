@@ -226,7 +226,7 @@ import AnimatedInput from '@/components/AnimatedInput.vue';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { toast } from 'vue3-toastify';
 
-const API_URL = 'https://igor-plaxin.ru/healthy-eat/patient';
+const API_URL = 'https://igor-plaxin.store/healthy-eat/patient';
 
 const patients = ref([]);
 const isLoading = ref(true);

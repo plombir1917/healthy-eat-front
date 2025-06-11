@@ -273,9 +273,9 @@ import AnimatedButton from '@/components/AnimatedButton.vue';
 import AnimatedInput from '@/components/AnimatedInput.vue';
 import { useAuth } from '~/composables/useAuth';
 
-const API_URL = 'https://igor-plaxin.ru/healthy-eat/doctor';
+const API_URL = 'https://igor-plaxin.store/healthy-eat/doctor';
 const TOKEN_PAYLOAD_URL =
-  'https://igor-plaxin.ru/healthy-eat/auth/token-payload';
+  'https://igor-plaxin.store/healthy-eat/auth/token-payload';
 
 const doctors = ref([]);
 const isLoading = ref(true);

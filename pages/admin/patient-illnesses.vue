@@ -181,7 +181,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useAuth } from '~/composables/useAuth';
 
 const { getToken } = useAuth();
-const API_URL = 'https://igor-plaxin.ru/healthy-eat';
+const API_URL = 'https://igor-plaxin.store/healthy-eat';
 const userRole = ref(null);
 
 const patients = ref([]);

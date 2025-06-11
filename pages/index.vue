@@ -746,9 +746,9 @@ import {
 } from 'lucide-vue-next';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
-const API_URL = 'https://igor-plaxin.ru/healthy-eat/process-map';
-const DIET_URL = 'https://igor-plaxin.ru/healthy-eat/diet';
-const ILLNESS_URL = 'https://igor-plaxin.ru/healthy-eat/illness';
+const API_URL = 'https://igor-plaxin.store/healthy-eat/process-map';
+const DIET_URL = 'https://igor-plaxin.store/healthy-eat/diet';
+const ILLNESS_URL = 'https://igor-plaxin.store/healthy-eat/illness';
 const processMaps = ref([]);
 const diets = ref([]);
 const illnesses = ref([]);

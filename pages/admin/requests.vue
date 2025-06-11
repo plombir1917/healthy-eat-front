@@ -402,12 +402,13 @@ import AnimatedButton from '@/components/AnimatedButton.vue';
 import AnimatedInput from '@/components/AnimatedInput.vue';
 import { useAuth } from '~/composables/useAuth';
 
-const API_URL = 'https://igor-plaxin.ru/healthy-eat/request';
+const API_URL = 'https://igor-plaxin.store/healthy-eat/request';
 const TOKEN_PAYLOAD_URL =
-  'https://igor-plaxin.ru/healthy-eat/auth/token-payload';
-const DOCTORS_URL = 'https://igor-plaxin.ru/healthy-eat/doctor';
-const PATIENTS_URL = 'https://igor-plaxin.ru/healthy-eat/patient';
-const RECOMMENDATIONS_URL = 'https://igor-plaxin.ru/healthy-eat/recommendation';
+  'https://igor-plaxin.store/healthy-eat/auth/token-payload';
+const DOCTORS_URL = 'https://igor-plaxin.store/healthy-eat/doctor';
+const PATIENTS_URL = 'https://igor-plaxin.store/healthy-eat/patient';
+const RECOMMENDATIONS_URL =
+  'https://igor-plaxin.store/healthy-eat/recommendation';
 const { getToken } = useAuth();
 
 const requests = ref([]);

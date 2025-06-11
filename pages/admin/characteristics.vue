@@ -238,10 +238,10 @@ import AnimatedInput from '@/components/AnimatedInput.vue';
 import { toast } from 'vue3-toastify';
 import { useAuth } from '~/composables/useAuth';
 
-const API_URL = 'https://igor-plaxin.ru/healthy-eat/characteristic';
-const PATIENTS_URL = 'https://igor-plaxin.ru/healthy-eat/patient';
+const API_URL = 'https://igor-plaxin.store/healthy-eat/characteristic';
+const PATIENTS_URL = 'https://igor-plaxin.store/healthy-eat/patient';
 const TOKEN_PAYLOAD_URL =
-  'https://igor-plaxin.ru/healthy-eat/auth/token-payload';
+  'https://igor-plaxin.store/healthy-eat/auth/token-payload';
 const { getToken } = useAuth();
 
 const characteristics = ref([]);
